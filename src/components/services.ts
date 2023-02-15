@@ -9,21 +9,7 @@ import {
   deleteMockResource,
   readAllMockResources,
 } from "./data_access_object";
-import { decodeBase64, generateResponse, isNullOrUndefined } from "./utility";
-
-function generateId(mockResource: MockResource): string {
-  const unescapedId = `${mockResource.mockType}${mockResource.resourceUrl}${mockResource.httpMethod}`;
-  return unescapedId.replace(/[\\/\-_]+/g, "");
-}
-
-function getBody(request: string): MockResource {
-  const parsedMockResource = JSON.parse(decodeBase64(request)) as MockResource;
-  const escapedResourceUrl = generateId(parsedMockResource);
-  return {
-    ...parsedMockResource,
-    id: escapedResourceUrl,
-  };
-}
+import { generateId, generateResponse, isNullOrUndefined } from "./utility";
 
 export async function getResource(id: string): Promise<APIGatewayProxyResult> {
   let response;
@@ -51,16 +37,15 @@ export async function getAllResources(): Promise<APIGatewayProxyResult> {
 }
 
 export async function createResource(
-  request: string | null
+  request: MockResource
 ): Promise<APIGatewayProxyResult> {
   let response;
   try {
-    if (request !== null) {
-      const mockResource = getBody(request);
-      const result = await readMockResource(mockResource.id);
+    if (request !== null && request !== undefined) {
+      const result = await readMockResource(request.id);
       if (isNullOrUndefined(result)) {
-        await putMockResource(mockResource);
-        response = generateResponse(201, mockResource);
+        await putMockResource(request);
+        response = generateResponse(201, request);
       } else {
         response = generateResponse(409, null);
       }
@@ -74,18 +59,18 @@ export async function createResource(
 }
 
 export async function updateResource(
-  request: string | null
+  id: string,
+  request: MockResource
 ): Promise<APIGatewayProxyResult> {
   let response;
   try {
-    if (request !== null) {
-      const mockResource = JSON.parse(decodeBase64(request)) as MockResource;
-      const escapedResourceUrl = generateId(mockResource);
-      if (mockResource.id === escapedResourceUrl) {
-        const existentMockResource = await readMockResource(mockResource.id);
+    if (request !== null && request !== undefined) {
+      const escapedResourceUrl = generateId(request);
+      if (id === escapedResourceUrl) {
+        const existentMockResource = await readMockResource(id);
         if (!isNullOrUndefined(existentMockResource)) {
-          await putMockResource(mockResource);
-          response = generateResponse(200, mockResource);
+          await putMockResource(request);
+          response = generateResponse(200, request);
         } else {
           response = generateResponse(404, null);
         }

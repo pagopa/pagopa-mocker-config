@@ -8,6 +8,11 @@ import {
   updateResource,
   deleteResource,
 } from "./components/services";
+import {
+  decodeBase64,
+  setGeneratedIdToMockResource as generateIdForMockResource,
+} from "./components/utility";
+import { MockResource } from "./models/mock_resource";
 import { Router } from "./types/router";
 
 const RESOURCE_PATH = "resources";
@@ -28,14 +33,18 @@ router.setRoute(
 router.setRoute(
   "POST",
   RESOURCE_PATH,
-  (event: APIGatewayEvent, _params: readonly string[]) =>
-    createResource(event.body)
+  (event: APIGatewayEvent, _params: readonly string[]) => {
+    const mockResource = generateIdForMockResource(
+      JSON.parse(decodeBase64(event.body)) as MockResource
+    );
+    return createResource(mockResource);
+  }
 );
 router.setRoute(
   "PUT",
   RESOURCE_ID_PATH,
-  (event: APIGatewayEvent, _params: readonly string[]) =>
-    updateResource(event.body)
+  (event: APIGatewayEvent, params: readonly string[]) =>
+    updateResource(params[1], JSON.parse(decodeBase64(event.body)))
 );
 router.setRoute(
   "DELETE",
