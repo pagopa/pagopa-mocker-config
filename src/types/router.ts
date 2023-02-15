@@ -32,10 +32,10 @@ export class Router {
     key: string,
     event: APIGatewayEvent
   ): Promise<APIGatewayProxyResult> {
-    for (const [re, callback] of this.routes.entries()) {
-      const res = re.exec(key);
-      if (res) {
-        return callback(event, res);
+    for (const [routeRegex, callback] of this.routes.entries()) {
+      const routePathParams = routeRegex.exec(key);
+      if (routePathParams) {
+        return callback(event, routePathParams);
       }
     }
     return {
