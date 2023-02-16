@@ -8,8 +8,8 @@ import {
   getResource,
   updateResource,
 } from "./components/services";
-import { setGeneratedIdToMockResource } from "./components/utility";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const bodyParser = require("body-parser");
 dotenv.config({ path: "./.env" });
 
@@ -17,7 +17,7 @@ dotenv.config({ path: "./.env" });
 const app: express.Application = express();
 
 // Take a port 3000 for running server.
-const port: number = 3000;
+const port: number = 3001;
 
 const RESOURCE_PATH = "/resources";
 const RESOURCE_ID_PATH = "/resources/:resourceId";
@@ -35,7 +35,7 @@ app.get(RESOURCE_ID_PATH, async (req, res) => {
   res.end();
 });
 app.post(RESOURCE_PATH, jsonParser, async (req, res) => {
-  const result = await createResource(setGeneratedIdToMockResource(req.body));
+  const result = await createResource(req.body);
   res.status(result.statusCode).json(JSON.parse(result.body));
   res.end();
 });

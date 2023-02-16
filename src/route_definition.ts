@@ -8,10 +8,7 @@ import {
   updateResource,
   deleteResource,
 } from "./components/services";
-import {
-  decodeBase64,
-  setGeneratedIdToMockResource as generateIdForMockResource,
-} from "./components/utility";
+import { decodeBase64 } from "./components/utility";
 import { MockResource } from "./models/mock_resource";
 import { Router } from "./types/router";
 
@@ -34,9 +31,7 @@ router.setRoute(
   "POST",
   RESOURCE_PATH,
   (event: APIGatewayEvent, _params: readonly string[]) => {
-    const mockResource = generateIdForMockResource(
-      JSON.parse(decodeBase64(event.body)) as MockResource
-    );
+    const mockResource = JSON.parse(decodeBase64(event.body)) as MockResource;
     return createResource(mockResource);
   }
 );

@@ -9,7 +9,12 @@ import {
   deleteMockResource,
   readAllMockResources,
 } from "./data_access_object";
-import { generateId, generateResponse, isNullOrUndefined } from "./utility";
+import {
+  generateId,
+  generateResponse,
+  setGeneratedIdToMockResource,
+  isNullOrUndefined,
+} from "./utility";
 
 export async function getResource(id: string): Promise<APIGatewayProxyResult> {
   let response;
@@ -42,10 +47,11 @@ export async function createResource(
   let response;
   try {
     if (request !== null && request !== undefined) {
-      const result = await readMockResource(request.id);
+      const mockResource = setGeneratedIdToMockResource(request);
+      const result = await readMockResource(mockResource.id);
       if (isNullOrUndefined(result)) {
-        await putMockResource(request);
-        response = generateResponse(201, request);
+        await putMockResource(mockResource);
+        response = generateResponse(201, mockResource);
       } else {
         response = generateResponse(409, null);
       }
