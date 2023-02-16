@@ -1,8 +1,8 @@
 {
-  "body": "eyJ0ZXN0IjoiYm9keSJ9",
+  "body": "ewogICJyZXNvdXJjZVVybCI6ICIvYnJva2Vycy8yMjIyMiIsCiAgIm5hbWUiOiAiTW9ja2VkIHJlc3BvbnNlcyBmb3IgY29tbXVuaWNhdGlvbiB3aXRoIEFwaUNvbmZpZyAtIEJyb2tlciAyMjIyMiBbRURJVF0iLAogICJydWxlcyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAiTWFpbiBydWxlIGZvciByZXRyaWV2aW5nIGJyb2tlciB3aXRoIGlkPTIyMjIyIFtFRElUXSIsCiAgICAgICJpZCI6ICIxOWNhZjNiYy03YWE5LTRmNDctYTk5Yy0zOGNlNTlkNzIwOTkiLAogICAgICAidGFnIjogWwogICAgICAgICJCcm9rZXIiCiAgICAgIF0sCiAgICAgICJpc0FjdGl2ZSI6IGZhbHNlLAogICAgICAiY29uZGl0aW9ucyI6IFtdLAogICAgICAicmVzcG9uc2UiOiB7CiAgICAgICAgImhlYWRlcnMiOiB7CiAgICAgICAgICAieC1wb3dlcmVkLWJ5IjogIk1vY2tlciIsCiAgICAgICAgICAiQ29udGVudC1UeXBlIjogImFwcGxpY2F0aW9uL2pzb247IGNoYXJzZXQ9dXRmLTgiCiAgICAgICAgfSwKICAgICAgICAiaWQiOiAiMWM1NzQ4OTktZjVmNy00Y2NmLWIzNTUtMzBhNmQyNDU0Zjk5IiwKICAgICAgICAiYm9keSI6ICJzb21ldGhpbmciLAogICAgICAgICJzdGF0dXMiOiAyMDAKICAgICAgfQogICAgfQogIF0sCiAgIm1vY2tUeXBlIjogImFwaS1jZmciLAogICJ0YWciOiBbCiAgICAiUkVTVCIsCiAgICAiQXBpQ29uZmlnIiwKICAgICJCcm9rZXIiCiAgXSwKICAiaHR0cE1ldGhvZCI6ICJHRVQiCn0=",
   "resource": "/mock-cfg/{proxy+}",
-  "path": "/resources/id/rules/id/",
-  "httpMethod": "GET",
+  "path": "/resources/",
+  "httpMethod": "POST",
   "isBase64Encoded": true,
   "queryStringParameters": {
     "foo": "bar"

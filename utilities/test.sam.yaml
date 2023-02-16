@@ -10,6 +10,12 @@ Resources:
       CodeUri: ../src/
       Handler: app.handler
       Runtime: nodejs18.x
+      MemorySize: 512
+      Timeout: 5
+      Environment:
+        Variables:
+          IN_LOCAL: true
+          TABLE_NAME: pagopamockresource
       Architectures: # uncomment this if you wanna execute in M1 chip 
         - arm64 
       FunctionUrlConfig:
@@ -21,6 +27,13 @@ Resources:
             - "*"
           AllowMethods:
             - "*"
+      Policies:
+      - Version: '2012-10-17'
+        Statement:
+        - Action:
+          - dynamodb:*
+          Effect: Allow
+          Resource: "*"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

@@ -1,13 +1,8 @@
 import { Context, APIGatewayProxyResult, APIGatewayEvent } from "aws-lambda";
+import { router } from "./route_definition";
 
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
-export const handler = async function (
-  _event: APIGatewayEvent,
+export const handler = async (
+  event: APIGatewayEvent,
   _context: Context
-): Promise<APIGatewayProxyResult> {
-  return {
-    body: JSON.stringify({ message: "Hi there! I am a Lambda function!" }),
-    headers: { "Content-Type": "application/json" },
-    statusCode: 200,
-  };
-};
+): Promise<APIGatewayProxyResult> =>
+  router.callRoute(`${event.httpMethod} ${event.pathParameters?.proxy}`, event);
