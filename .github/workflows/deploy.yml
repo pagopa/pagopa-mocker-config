@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: eu-south-1  
-  ECR_REPOSITORY: pagopadlambdatemplate
+  ECR_REPOSITORY: pagopadmockconfig
 
   
 permissions:
