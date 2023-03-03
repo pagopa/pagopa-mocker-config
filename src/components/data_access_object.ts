@@ -17,7 +17,6 @@ const getDocumentClientOptions = (): any => {
     };
   } else {
     result = {
-      endpoint: process.env.DYNAMODB_ENDPOINT,
       region: process.env.DYNAMODB_REGION,
     };
   }
