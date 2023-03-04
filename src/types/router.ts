@@ -40,7 +40,7 @@ export class Router {
     }
     return {
       body: JSON.stringify(
-        { message: `No resource found at path [$key]!` },
+        { message: `No resource found at path [${key}]!` },
         null,
         "\t"
       ),
