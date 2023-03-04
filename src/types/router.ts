@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/prefer-readonly-type */
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
@@ -8,6 +9,7 @@ export class Router {
 
   constructor() {
     this.routes = new Map<RegExp, CallbackFunction>();
+    console.debug("Generated Router object. Registered 0 routes");
   }
 
   public setRoute(
@@ -26,12 +28,16 @@ export class Router {
     const generatedRegex = `^${httpMethod} [\\/]{0,1}${unescapedRegex}[\\/]{0,1}$`;
     const regExp = new RegExp(generatedRegex, "g");
     this.routes.set(regExp, callback);
+    console.debug(
+      `Registered route ${generatedRegex}. Defined ${this.routes.size} routes.`
+    );
   }
 
   public async callRoute(
     key: string,
     event: APIGatewayEvent
   ): Promise<APIGatewayProxyResult> {
+    console.debug(`Trying to invoke ${key} route...`);
     for (const [routeRegex, callback] of this.routes.entries()) {
       const routePathParams = routeRegex.exec(key);
       if (routePathParams) {
