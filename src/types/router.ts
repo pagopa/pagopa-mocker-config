@@ -16,7 +16,7 @@ export class Router {
     httpMethod: string,
     regex: string,
     callback: CallbackFunction
-  ): void {
+  ): Router {
     let unescapedRegex = regex.startsWith("/") ? regex.slice(1, 0) : regex;
     if (unescapedRegex.endsWith("/")) {
       unescapedRegex = unescapedRegex.slice(0, -1);
@@ -29,15 +29,18 @@ export class Router {
     const regExp = new RegExp(generatedRegex, "g");
     this.routes.set(regExp, callback);
     console.debug(
-      `Registered route ${generatedRegex}. Defined ${this.routes.size} routes.`
+      `Registered route [${generatedRegex}]. Defined ${this.routes.size} routes.`
     );
+    return this;
   }
 
   public async callRoute(
     key: string,
     event: APIGatewayEvent
   ): Promise<APIGatewayProxyResult> {
-    console.debug(`Trying to invoke ${key} route...`);
+    console.debug(
+      `Trying to invoke [${key}] route. Analyzing ${this.routes.size} elements.`
+    );
     for (const [routeRegex, callback] of this.routes.entries()) {
       const routePathParams = routeRegex.exec(key);
       if (routePathParams) {
