@@ -35,11 +35,15 @@ export class Router {
     for (const [routeRegex, callback] of this.routes.entries()) {
       const routePathParams = routeRegex.exec(key);
       if (routePathParams) {
-        return callback(event, routePathParams);
+        return await callback(event, routePathParams);
       }
     }
     return {
-      body: JSON.stringify({ message: "No resource found!" }, null, "\t"),
+      body: JSON.stringify(
+        { message: `No resource found at path [$key]!` },
+        null,
+        "\t"
+      ),
       headers: { "Content-Type": "application/json" },
       statusCode: 404,
     };
