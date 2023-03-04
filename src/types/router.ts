@@ -43,7 +43,8 @@ export class Router {
     );
     for (const [routeRegex, callback] of this.routes.entries()) {
       const routePathParams = routeRegex.exec(key);
-      if (routePathParams) {
+      if (routePathParams !== null) {
+        console.debug("Route found. Invoking related function...");
         return await callback(event, routePathParams);
       }
     }
