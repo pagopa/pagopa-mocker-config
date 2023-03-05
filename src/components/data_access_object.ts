@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/prefer-readonly-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -17,8 +18,7 @@ const getDocumentClientOptions = (): any => {
     };
   } else {
     result = {
-      endpoint: process.env.DYNAMODB_ENDPOINT,
-      region: process.env.DYNAMODB_REGION,
+      region: "eu-south-1",
     };
   }
   return result;
@@ -35,10 +35,14 @@ const handleError = (err: AWSError): void => {
 
 export const readAllMockResources = async (): Promise<MockResource[]> => {
   const results: MockResource[] = [];
+  const tableName = getTableName();
   try {
     const parameters = {
-      TableName: getTableName(),
+      TableName: tableName,
     };
+    console.debug(
+      `Start search of all mock resources on table [${tableName}].`
+    );
     const database = new DynamoDB.DocumentClient(getDocumentClientOptions());
     const retrievedData = await database.scan(parameters).promise();
     retrievedData.Items?.forEach((item) =>
@@ -54,13 +58,17 @@ export const readMockResource = async (
   resourceId: string
 ): Promise<MockResource> => {
   let result;
+  const tableName = getTableName();
   try {
     const parameters = {
       Key: {
         id: resourceId,
       },
-      TableName: getTableName(),
+      TableName: tableName,
     };
+    console.debug(
+      `Start search of mock resource with id=[${resourceId}] on table [${tableName}].`
+    );
     const database = new DynamoDB.DocumentClient(getDocumentClientOptions());
     result = await database
       .get(parameters, (err: AWSError) => handleError(err))
