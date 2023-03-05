@@ -45,6 +45,8 @@ export class Router {
       for (const [routeRegex, callback] of this.routes.entries()) {
         console.trace(`Analyzing route regex [${routeRegex.source}]`);
         const routePathParams = routeRegex.exec(key);
+        // eslint-disable-next-line functional/immutable-data
+        routeRegex.lastIndex = 0; // resetting regex index
         console.trace(`Found path param [${routePathParams}]`);
         if (routePathParams !== null) {
           console.debug("Route found. Invoking related function...");
