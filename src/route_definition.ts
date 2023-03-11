@@ -8,6 +8,7 @@ import {
   updateResource,
   deleteResource,
 } from "./components/services";
+import { generateOptionsResponse } from "./components/utility";
 import { MockResource } from "./models/mock_resource";
 import { Router } from "./types/router";
 
@@ -52,4 +53,16 @@ export const router = new Router()
     RESOURCE_ID_PATH,
     (_event: APIGatewayEvent, params: readonly string[]) =>
       deleteResource(params[1])
+  )
+  .setRoute(
+    "OPTIONS",
+    RESOURCE_PATH,
+    (_event: APIGatewayEvent, _params: readonly string[]) =>
+      generateOptionsResponse()
+  )
+  .setRoute(
+    "OPTIONS",
+    RESOURCE_ID_PATH,
+    (_event: APIGatewayEvent, _params: readonly string[]) =>
+      generateOptionsResponse()
   );
