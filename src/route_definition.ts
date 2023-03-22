@@ -8,7 +8,7 @@ import {
   updateResource,
   deleteResource,
 } from "./components/services";
-import { decodeBase64 } from "./components/utility";
+import { generateOptionsResponse } from "./components/utility";
 import { MockResource } from "./models/mock_resource";
 import { Router } from "./types/router";
 
@@ -31,19 +31,38 @@ export const router = new Router()
     "POST",
     RESOURCE_PATH,
     (event: APIGatewayEvent, _params: readonly string[]) => {
-      const mockResource = JSON.parse(decodeBase64(event.body)) as MockResource;
+      if (event.body === null) {
+        throw new Error("Passed null body request");
+      }
+      const mockResource = JSON.parse(event.body) as MockResource;
       return createResource(mockResource);
     }
   )
   .setRoute(
     "PUT",
     RESOURCE_ID_PATH,
-    (event: APIGatewayEvent, params: readonly string[]) =>
-      updateResource(params[1], JSON.parse(decodeBase64(event.body)))
+    (event: APIGatewayEvent, params: readonly string[]) => {
+      if (event.body === null) {
+        throw new Error("Passed null body request");
+      }
+      return updateResource(params[1], JSON.parse(event.body));
+    }
   )
   .setRoute(
     "DELETE",
     RESOURCE_ID_PATH,
     (_event: APIGatewayEvent, params: readonly string[]) =>
       deleteResource(params[1])
+  )
+  .setRoute(
+    "OPTIONS",
+    RESOURCE_PATH,
+    (_event: APIGatewayEvent, _params: readonly string[]) =>
+      generateOptionsResponse()
+  )
+  .setRoute(
+    "OPTIONS",
+    RESOURCE_ID_PATH,
+    (_event: APIGatewayEvent, _params: readonly string[]) =>
+      generateOptionsResponse()
   );

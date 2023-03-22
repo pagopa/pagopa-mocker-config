@@ -36,3 +36,10 @@ export const setGeneratedIdToMockResource = (
     id: escapedResourceUrl,
   };
 };
+
+// eslint-disable-next-line prettier/prettier
+export const generateOptionsResponse = async (): Promise<APIGatewayProxyResult> => ({
+    body: "",
+    headers: { Allows: "OPTIONS, GET, HEAD, POST, PUT, DELETE" },
+    statusCode: 200,
+  });

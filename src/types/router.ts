@@ -38,26 +38,30 @@ export class Router {
     key: string,
     event: APIGatewayEvent
   ): Promise<APIGatewayProxyResult> {
-    console.debug(
-      `Trying to invoke [${key}] route. Analyzing ${this.routes.size} elements.`
-    );
-    for (const [routeRegex, callback] of this.routes.entries()) {
-      const routePathParams = routeRegex.exec(key);
-      // eslint-disable-next-line functional/immutable-data
-      routeRegex.lastIndex = 0; // resetting regex index
-      if (routePathParams !== null) {
-        console.debug("Route found. Invoking related function...");
-        return await callback(event, routePathParams);
+    let message = `No resource found at path [${key}]!`;
+    let statusCode = 404;
+    try {
+      console.debug(
+        `Trying to invoke [${key}] route. Analyzing ${this.routes.size} elements.`
+      );
+      for (const [routeRegex, callback] of this.routes.entries()) {
+        const routePathParams = routeRegex.exec(key);
+        // eslint-disable-next-line functional/immutable-data
+        routeRegex.lastIndex = 0; // resetting regex index
+        if (routePathParams !== null) {
+          console.debug("Route found. Invoking related function...");
+          return await callback(event, routePathParams);
+        }
       }
+    } catch (err) {
+      message = "An error occurred while executing the request.";
+      statusCode = 500;
+      console.error(err);
     }
     return {
-      body: JSON.stringify(
-        { message: `No resource found at path [${key}]!` },
-        null,
-        "\t"
-      ),
+      body: JSON.stringify({ message }, null, "\t"),
       headers: { "Content-Type": "application/json" },
-      statusCode: 404,
+      statusCode,
     };
   }
 }
