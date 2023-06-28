@@ -25,7 +25,7 @@ public class Utility {
   }
 
   public static String generateResourceId(MockResource mockResource) {
-    return String.format(Constants.RESOURCE_ID_TEMPLATE, mockResource.getSubsystem(), mockResource.getResourceURL(), mockResource.getHttpMethod())
+    return String.format(Constants.RESOURCE_ID_TEMPLATE, mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL())
             .toLowerCase()
             .replaceAll("[\\\\/\\-_]+", "");
   }

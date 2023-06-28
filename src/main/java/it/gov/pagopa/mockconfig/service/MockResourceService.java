@@ -69,11 +69,12 @@ public class MockResourceService {
 
             // Search if the resource already exists
             String resourceId = Utility.generateResourceId(mockResource);
-            mockResourceRepository.findById(resourceId).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, resourceId); });
+            mockResourceRepository.findByResourceId(resourceId).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, resourceId); });
 
             // Map entity from input model, setting id and tags and completing the entities' tree
+            mockResource.setIdIfNull(Utility.generateUUID());
             MockResourceEntity mockResourceEntity = modelMapper.map(mockResource, MockResourceEntity.class);
-            mockResourceEntity.setId(resourceId);
+            mockResourceEntity.setResourceId(resourceId);
             mockResourceEntity.setTags(getTagEntities(mockResource.getTags()));
             extractMockRuleEntities(mockResource, mockResourceEntity);
 
@@ -92,14 +93,14 @@ public class MockResourceService {
         MockResource response;
         try {
 
-            // Check if passed resource identifier is equals to the one generable by body content
-            String generatedResourceId = Utility.generateResourceId(mockResource);
-            if (!generatedResourceId.equals(resourceId)) {
-                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID, resourceId, generatedResourceId);
-            }
-
             // Search if the resource exists
-            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+            String generatedResourceId = Utility.generateResourceId(mockResource);
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findByResourceId(generatedResourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+
+            // Check if passed resource identifier is equals to the one generable by body content
+            if (!mockResourceEntity.getId().equals(resourceId)) {
+                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID, resourceId, mockResourceEntity.getId());
+            }
 
             // Map entity from input model, setting id and tags and completing the entities' tree
             mockResourceEntity.setName(mockResource.getName());
