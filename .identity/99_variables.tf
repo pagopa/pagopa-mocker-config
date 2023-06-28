@@ -1,11 +1,11 @@
 locals {
   github = {
     org        = "pagopa"
-    repository = "pagopa-mock-config"
+    repository = "pagopa-mock-config-be"
   }
 
   prefix         = "pagopa"
-  domain         = "mocker"
+  domain         = "mock"
   location_short = "weu"
   product        = "${var.prefix}-${var.env_short}"
 
