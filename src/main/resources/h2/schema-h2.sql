@@ -1,5 +1,6 @@
 CREATE TABLE mocker.mock_resource (
 	id varchar NOT NULL,
+	resource_id varchar NOT NULL,
 	subsystem_url varchar NOT NULL,
 	resource_url varchar NOT NULL,
 	http_method varchar NOT NULL,
