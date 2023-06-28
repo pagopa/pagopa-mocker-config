@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  mock-config-app:
+    container_name: 'pagopamockconfig'
+    image: ${image}
+    build:
+      dockerfile: Dockerfile
+      context: ../
+    ports:
+      - "8080:8080"
