@@ -9,6 +9,9 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
+/**
+ * The model that define the header that will be set to a mocked response
+ */
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -16,15 +19,16 @@ import java.io.Serializable;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "The header that will be set to a mocked response")
 public class ResponseHeader implements Serializable {
 
     @JsonProperty("name")
-    @Schema(description = "", example = "")
+    @Schema(description = "The key of the header to be set to mock response by Mocker.", example = "Content-Type")
     @NotNull
     private String name;
 
     @JsonProperty("value")
-    @Schema(description = "", example = "")
+    @Schema(description = "The value of the header to be set to mock response by Mocker.", example = "application/json")
     @NotNull
     private String value;
 }

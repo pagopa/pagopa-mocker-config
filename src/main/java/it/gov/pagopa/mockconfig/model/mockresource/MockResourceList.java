@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * The model that contains the list of mock resources.
+ * The model that contains the paginated list of mock resources.
  */
 @Data
 @Builder(toBuilder = true)
@@ -22,15 +22,16 @@ import java.util.List;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "The paginated list of mock resources.")
 public class MockResourceList implements Serializable {
 
     @JsonProperty("resources")
     @NotNull
-    @Schema(description = "The list of retrieved mock resources")
+    @Schema(description = "The list of retrieved mock resources.")
     private List<MockResource> mockResources;
 
     @JsonProperty("page_info")
-    @Schema()
+    @Schema(description = "The information related to the result page.")
     @NotNull
     @Valid
     private PageInfo pageInfo;
