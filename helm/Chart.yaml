@@ -1,0 +1,10 @@
+apiVersion: v2
+name: pagopa-mock-config-be
+description: A service that permits to configure the mocked responses used by Mocker service
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+  - name: microservice-chart
+    version: 1.21.0
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"

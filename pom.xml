@@ -11,7 +11,7 @@
     </parent>
     <groupId>it.gov.pagopa</groupId>
     <artifactId>mockconfig</artifactId>
-    <version>0.0.2</version>
+    <version>1.0.0</version>
     <name>pagopa-mock-config-be</name>
     <description>A service that permits to configure the mocked responses used by Mocker service</description>
     <properties>
