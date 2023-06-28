@@ -141,7 +141,9 @@ public class MockResourceService {
         if (mockResourceEntity.getRules() == null) {
             mockResourceEntity.setRules(new LinkedList<>());
         }
+        mockResourceEntity.getRules().forEach(rule -> rule.getConditions().clear());
         mockResourceEntity.getRules().clear();
+        mockResourceRepository.flush();
 
         for (MockRule mockRule : mockResource.getRules()) {
 
