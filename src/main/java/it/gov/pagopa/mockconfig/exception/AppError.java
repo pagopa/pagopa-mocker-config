@@ -15,6 +15,7 @@ public enum AppError {
   MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_CONDITION_ORDER(HttpStatus.BAD_REQUEST, "Duplicated mock condition cardinal order", "One or more cardinal order value for the mock condition related to the rules [%s] are duplicated."),
   MOCK_RESOURCE_BAD_REQUEST_INVALID_UNARY_CONDITION(HttpStatus.BAD_REQUEST, "Invalid unary condition", "The unary condition for mock rule [%] at order [%d] is set with a condition value but it must be set with null value."),
   MOCK_RESOURCE_BAD_REQUEST_INVALID_BINARY_CONDITION(HttpStatus.BAD_REQUEST, "Invalid binary condition", "The binary condition for mock rule [%] at order [%d] is set without a condition value but it must be set with non-null value."),
+  MOCK_RESOURCE_BAD_REQUEST_INVALID_REGEX(HttpStatus.BAD_REQUEST, "Invalid regex condition", "The regular expression set in the condition for mock rule [%] at order [%d] is invalid and cannot be used as valid value."),
   MOCK_RESOURCE_BAD_REQUEST_INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "Invalid content type in condition", "The content type of mock condition for mock rule [%] at order [%d] is set as [%s] but it is incompatible with [%s] content."),
   MOCK_RESOURCE_BAD_REQUEST_UNPARSEABLE_RESPONSE_BODY(HttpStatus.BAD_REQUEST, "Invalid format for response body", "The response body related to the mock rule [%] is not passed as a valid Base64 content."),
   MOCK_RESOURCE_CONFLICT(HttpStatus.CONFLICT, "Mock resource already exists", "Another mock resource exists with id [%s]."),

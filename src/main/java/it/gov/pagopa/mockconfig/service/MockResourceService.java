@@ -3,11 +3,11 @@ package it.gov.pagopa.mockconfig.service;
 import it.gov.pagopa.mockconfig.entity.*;
 import it.gov.pagopa.mockconfig.exception.AppError;
 import it.gov.pagopa.mockconfig.exception.AppException;
-import it.gov.pagopa.mockconfig.model.enumeration.RuleFieldPosition;
+import it.gov.pagopa.mockconfig.model.enumeration.ConditionType;
 import it.gov.pagopa.mockconfig.model.mockresource.*;
+import it.gov.pagopa.mockconfig.model.mockresource.validator.MockResourceValidation;
 import it.gov.pagopa.mockconfig.repository.MockResourceRepository;
 import it.gov.pagopa.mockconfig.repository.TagRepository;
-import it.gov.pagopa.mockconfig.util.Constants;
 import it.gov.pagopa.mockconfig.util.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 @Service
@@ -140,41 +142,27 @@ public class MockResourceService {
 
             // check if there is a duplicate value on rule order value
             int ruleOrder = mockRule.getOrder();
-            if (assignedRuleOrderCardinality.contains(ruleOrder)) {
-                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_RULE_ORDER);
-            }
-            assignedRuleOrderCardinality.add(ruleOrder);
+            MockResourceValidation.checkRuleOrderDuplication(assignedRuleOrderCardinality, ruleOrder);
 
             Set<Integer> assignedConditionOrderCardinality = new HashSet<>();
             for (MockCondition mockCondition : mockRule.getConditions()) {
 
                 // check if there is a duplicate value on condition order value
                 int conditionOrder = mockCondition.getOrder();
-                if (assignedConditionOrderCardinality.contains(conditionOrder)) {
-                    throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_CONDITION_ORDER, mockRuleName);
-                }
-                assignedConditionOrderCardinality.add(ruleOrder);
+                MockResourceValidation.checkConditionOrderDuplication(assignedConditionOrderCardinality, conditionOrder, mockRuleName);
 
                 // check if the content type JSON,XML will be evaluated as other than body
-                if (Constants.CONTENT_TYPES_FOR_BODY.contains(mockCondition.getAnalyzedContentType()) && !RuleFieldPosition.BODY.equals(mockCondition.getFieldPosition())) {
-                    throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_CONTENT_TYPE, mockRuleName, conditionOrder, mockCondition.getAnalyzedContentType(), mockCondition.getFieldPosition());
-                }
+                MockResourceValidation.checkContentTypeCongruency(mockCondition, mockRuleName);
 
                 // check if there aren't the following cases: condition_value=null in non-nullable condition, condition_value=non-null in unary condition
-                if (mockCondition.getConditionValue() != null && Constants.UNARY_CONDITIONS.contains(mockCondition.getConditionType())) {
-                    throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_UNARY_CONDITION, mockRuleName, conditionOrder);
-                } else if (mockCondition.getConditionValue() == null && !Constants.UNARY_CONDITIONS.contains(mockCondition.getConditionType())) {
-                    throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_BINARY_CONDITION, mockRuleName, conditionOrder);
-                }
+                MockResourceValidation.checkConditionCongruency(mockCondition, mockRuleName);
+
+                // check, if condition type is regex evaluation, if the pattern is correct
+                MockResourceValidation.checkRegexValidity(mockCondition, mockRuleName);
             }
 
             // check if the body response is a valid Base64 content
-            try {
-                MockResponse mockResponse = mockRule.getResponse();
-                Base64.getDecoder().decode(mockResponse.getBody());
-            } catch (IllegalArgumentException e) {
-                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_UNPARSEABLE_RESPONSE_BODY, mockRuleName);
-            }
+            MockResourceValidation.checkBodyEncoding(mockRule);
         }
     }
 
