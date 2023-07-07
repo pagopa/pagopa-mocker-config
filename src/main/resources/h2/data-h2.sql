@@ -6,7 +6,7 @@ INSERT INTO mocker.tag(id, "value") VALUES('88513e6d-7229-43ea-96b5-f83ffd96d5f5
 
 
 INSERT INTO mocker.mock_resource(id, resource_id, subsystem_url, resource_url, http_method, "name", is_active)
-VALUES('70aa0abb-0001-0212-aa01-2cb1a0f00301', 'gpdreportingorgsenrollmentapiv1organizations77777777777get', 'gpd-reporting-orgs-enrollment/api/v1', 'organizations/77777777777', 'GET', 'Get enrolled organization with ID 77777777777', true);
+VALUES('70aa0abb-0001-0212-aa01-2cb1a0f00301', 'getgpdreportingorgsenrollmentapiv1organizations77777777777', 'gpd-reporting-orgs-enrollment/api/v1', 'organizations/77777777777', 'GET', 'Get enrolled organization with ID 77777777777', true);
 
 
 

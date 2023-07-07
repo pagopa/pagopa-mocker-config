@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -24,11 +25,12 @@ public class ResponseHeader implements Serializable {
 
     @JsonProperty("name")
     @Schema(description = "The key of the header to be set to mock response by Mocker.", example = "Content-Type")
-    @NotNull
+    @NotNull(message = "The name of the header to be assigned to the mocked response cannot be null.")
+    @NotBlank(message = "The name of the header to be assigned to the mocked response cannot be blank.")
     private String name;
 
     @JsonProperty("value")
     @Schema(description = "The value of the header to be set to mock response by Mocker.", example = "application/json")
-    @NotNull
+    @NotNull(message = "The value of the header to be assigned to the mocked response cannot be null.")
     private String value;
 }

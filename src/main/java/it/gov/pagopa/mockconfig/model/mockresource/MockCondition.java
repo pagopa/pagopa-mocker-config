@@ -10,7 +10,9 @@ import it.gov.pagopa.mockconfig.model.enumeration.ContentType;
 import it.gov.pagopa.mockconfig.model.enumeration.RuleFieldPosition;
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -32,27 +34,29 @@ public class MockCondition implements Serializable {
     private String id;
 
     @JsonProperty("order")
-    @Schema(description = "The cardinal order on which the mock condition will be evaluated by Mocker.", example = "")
+    @Schema(description = "The cardinal order on which the mock condition will be evaluated by Mocker.", example = "1")
+    @NotNull(message = "The cardinal order to be assigned to the mock condition cannot be null.")
+    @Positive(message = "The cardinal order to be assigned to the mock condition must be greater than 0.")
     private Integer order;
 
     @JsonProperty("field_position")
     @Schema(description = "The parameter that define where the field/element that will be evaluated by this condition is located in the request.", example = "BODY")
-    @NotNull
+    @NotNull(message = "The position of the field that will be evaluated by the condition cannot be null.")
     private RuleFieldPosition fieldPosition;
 
     @JsonProperty("analyzed_content_type")
     @Schema(description = "The parameter that define the type of the source in the request where the field/element that will be evaluated by this condition will be extracted.", example = "JSON")
-    @NotNull
+    @NotNull(message = "The type of the source on the request that will be evaluated by the condition cannot be null.")
     private ContentType analyzedContentType;
 
     @JsonProperty("field_name")
     @Schema(description = "The parameter that define the identifier of the field/element that will be evaluated by this condition", example = "station.id")
-    @NotNull
+    @NotBlank(message = "The name of the field that will be evaluated by the condition cannot be null or blank.")
     private String fieldName;
 
     @JsonProperty("condition_type")
     @Schema(description = "The parameter that define the type of condition that will be applied on the field/element that will be evaluated.", example = "EQ")
-    @NotNull
+    @NotNull(message = "The type of the condition to be applied by the condition cannot be null.")
     private ConditionType conditionType;
 
     @JsonProperty("condition_value")
