@@ -1,8 +1,11 @@
 package it.gov.pagopa.mockconfig.config;
 
+import it.gov.pagopa.mockconfig.entity.ArchetypeEntity;
 import it.gov.pagopa.mockconfig.entity.MockResourceEntity;
+import it.gov.pagopa.mockconfig.mapper.ConvertArchetypeEntityToArchetype;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceEntityToMockResource;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceToMockResourceEntity;
+import it.gov.pagopa.mockconfig.model.archetype.Archetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import org.modelmapper.ModelMapper;
@@ -21,7 +24,9 @@ public class MappingsConfiguration {
     // insert here the new mappers
     mapper.createTypeMap(MockResourceEntity.class, MockResource.class).setConverter(new ConvertMockResourceEntityToMockResource());
     mapper.createTypeMap(MockResource.class, MockResourceEntity.class).setConverter(new ConvertMockResourceToMockResourceEntity());
+    mapper.createTypeMap(ArchetypeEntity.class, Archetype.class).setConverter(new ConvertArchetypeEntityToArchetype());
 
+    //
     return mapper;
   }
 }

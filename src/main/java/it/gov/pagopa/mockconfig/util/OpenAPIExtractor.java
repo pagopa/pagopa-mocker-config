@@ -196,11 +196,11 @@ public class OpenAPIExtractor {
             responseHeaderEntities.add(ArchetypeResponseHeaderEntity.builder()
                     .id(ArchetypeResponseHeaderKey.builder()
                             .archetypeResponseId(archetypeResponseEntity.getId())
-                            .header(content.getLeft()) // add content-type from extracted content
+                            .header("Content-Type") // add content-type from extracted content
                             .build()
                     )
                     .response(archetypeResponseEntity)
-                    .value("Content-Type")
+                    .value(content.getLeft())
                     .build()
             );
 
@@ -225,7 +225,7 @@ public class OpenAPIExtractor {
                                 .header(headerEntry.getKey())
                                 .build()
                         )
-                        .value("")
+                        .value("-")
                         .response(archetypeResponseEntity)
                         .build()
                 );

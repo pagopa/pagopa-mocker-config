@@ -45,11 +45,7 @@ public class ConvertMockResourceFromArchetypeToMockResource {
             String body = reformatResponseBody(archetypeResponseEntity, mockRuleFromArchetype);
 
             // generating the injectable parameter list, taking the reformatted body searching if some parameter respect the format '${...}' on its value
-            List<String> injectableParameters = Pattern.compile("\\$\\{([a-zA-Z0-9_-]+)\\}")
-                    .matcher(body)
-                    .results()
-                    .map(res -> res.group(1))
-                    .collect(Collectors.toList());
+            List<String> injectableParameters = Utility.extractInjectableParameters(body);
 
             // retrieving the response (passed as input) related to the rule to be generated following the archetype
             MockResponseFromArchetype mockResponseFromArchetype = mockRuleFromArchetype.getResponse();

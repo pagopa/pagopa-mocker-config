@@ -9,6 +9,7 @@ public enum AppError {
 
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something went wrong."),
+  ARCHETYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "Archetype not found", "No valid archetype found with id [%s]."),
   MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID(HttpStatus.BAD_REQUEST, "Invalid mock resource identifier", "The passed resource id with value [%s] must be equals to the one defined from request ([%s])."),
   MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_URL(HttpStatus.BAD_REQUEST, "Invalid mock resource URL", "The subsystem or the resource URL passed as input is different from the values defined in the resource to be edited and cannot be changed."),
   MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_RULE_ORDER(HttpStatus.BAD_REQUEST, "Duplicated mock rule cardinal order", "One or more cardinal order value for the passed mock rules are duplicated."),

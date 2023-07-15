@@ -30,7 +30,7 @@ public class ArchetypeResponseEntity implements Serializable {
     @Column(name = "archetype_id", insertable = false, updatable = false)
     private String archetypeId;
 
-    @OneToMany(targetEntity = ArchetypeResponseHeaderEntity.class, mappedBy = "response", cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = ArchetypeResponseHeaderEntity.class, fetch = FetchType.LAZY, mappedBy = "response", cascade = CascadeType.ALL)
     private List<ArchetypeResponseHeaderEntity> headers;
 
     @ManyToOne(targetEntity = ArchetypeEntity.class, fetch = FetchType.LAZY, optional = false)

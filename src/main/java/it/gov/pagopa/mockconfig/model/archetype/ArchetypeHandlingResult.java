@@ -16,7 +16,7 @@ import java.io.Serializable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "")
-public class ArchetypeCreationResult implements Serializable {
+public class ArchetypeHandlingResult implements Serializable {
 
     @JsonProperty("subsystem_url")
     private String subsystemURL;

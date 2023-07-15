@@ -67,4 +67,16 @@ public class MockResourceValidation {
             throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_UNPARSEABLE_RESPONSE_BODY, mockRule.getName());
         }
     }
+
+    public static boolean checkBodyEncoding(String body) {
+        boolean isValid = true;
+        try {
+            if (body != null) {
+                Base64.getDecoder().decode(body);
+            }
+        } catch (IllegalArgumentException e) {
+            isValid = false;
+        }
+        return isValid;
+    }
 }

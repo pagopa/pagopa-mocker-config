@@ -9,7 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.gov.pagopa.mockconfig.model.ProblemJson;
-import it.gov.pagopa.mockconfig.model.archetype.ArchetypeCreationResult;
+import it.gov.pagopa.mockconfig.model.archetype.Archetype;
+import it.gov.pagopa.mockconfig.model.archetype.ArchetypeHandlingResult;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import it.gov.pagopa.mockconfig.service.ArchetypeService;
@@ -47,7 +48,7 @@ public class ArchetypeController {
             tags = {"Archetypes"}
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ArchetypeCreationResult.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ArchetypeHandlingResult.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
@@ -55,7 +56,7 @@ public class ArchetypeController {
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
     })
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ArchetypeCreationResult> importArchetypesFromOpenAPI(
+    public ResponseEntity<ArchetypeHandlingResult> importArchetypesFromOpenAPI(
             @Parameter()
             @NotBlank @RequestParam("subsystem") String subsystem,
             @Parameter(description = "JSON file containing the OpenAPI to analyze", required = true, content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
@@ -63,7 +64,70 @@ public class ArchetypeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(archetypeService.importArchetypesFromOpenAPI(file, subsystem));
     }
 
+    @Operation(
+            summary = "Get detail of a single archetype",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Mock Resources"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Archetype.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @GetMapping(value = "/{archetypeId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Archetype> getArchetype(
+            @Parameter(description = "The identifier related to the archetype", required = true)
+            @NotBlank @PathVariable("archetypeId") String archetypeId) {
+        return ResponseEntity.ok(archetypeService.getArchetype(archetypeId));
+    }
 
+
+    @Operation(
+            summary = "Delete all existing archetypes by criteria",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Archetypes"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @DeleteMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ArchetypeHandlingResult> deleteMockResource(
+            @Parameter()
+            @NotBlank @RequestParam("subsystem") String subsystem) {
+        return ResponseEntity.ok(archetypeService.deleteByCriteria(subsystem));
+    }
+
+    @Operation(
+            summary = "Create a new mock resource starting from archetype",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Archetypes"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
     @PostMapping(value = "/{archetypeId}/generate", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<MockResource> createMockResourceFromArchetype(
             @Parameter(description = "The identifier related to the archetype", required = true)

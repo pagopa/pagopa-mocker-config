@@ -61,7 +61,6 @@ public class MockResourceController {
         return ResponseEntity.ok(mockResourceService.getMockResources(PageRequest.of(page, limit)));
     }
 
-
     @Operation(
             summary = "Get detail of a single mock resource",
             security = {

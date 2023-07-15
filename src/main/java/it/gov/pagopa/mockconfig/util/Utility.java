@@ -6,7 +6,10 @@ import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import org.springframework.data.domain.Page;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Utility {
 
@@ -40,5 +43,13 @@ public class Utility {
       pPow = (pPow * Constants.P_HASHING_VALUE) % Constants.M_HASHING_VALUE;
     }
     return hashValue & 0xffffffffL;
+  }
+
+  public static List<String> extractInjectableParameters(String body) {
+    return Pattern.compile("\\$\\{([a-zA-Z0-9_-]+)\\}")
+            .matcher(body)
+            .results()
+            .map(res -> res.group(1))
+            .collect(Collectors.toList());
   }
 }

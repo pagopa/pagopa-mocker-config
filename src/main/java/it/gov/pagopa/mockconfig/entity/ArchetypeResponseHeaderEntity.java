@@ -24,7 +24,6 @@ public class ArchetypeResponseHeaderEntity implements Serializable {
     @Column(name = "value")
     private String value;
 
-
     @ManyToOne(targetEntity = ArchetypeResponseEntity.class, fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "archetype_response_id", insertable = false, updatable = false)
     private ArchetypeResponseEntity response;

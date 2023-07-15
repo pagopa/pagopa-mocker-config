@@ -3,13 +3,10 @@ package it.gov.pagopa.mockconfig.service;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import it.gov.pagopa.mockconfig.entity.*;
-import it.gov.pagopa.mockconfig.entity.embeddable.InjectableParameterKey;
-import it.gov.pagopa.mockconfig.entity.embeddable.ResponseHeaderKey;
 import it.gov.pagopa.mockconfig.exception.AppError;
 import it.gov.pagopa.mockconfig.exception.AppException;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceFromArchetypeToMockResource;
 import it.gov.pagopa.mockconfig.model.archetype.*;
-import it.gov.pagopa.mockconfig.model.mockresource.MockCondition;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import it.gov.pagopa.mockconfig.repository.ArchetypeRepository;
 import it.gov.pagopa.mockconfig.repository.MockResourceRepository;
@@ -27,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,8 +39,8 @@ public class ArchetypeService {
 
     @Autowired private ModelMapper modelMapper;
 
-    public ArchetypeCreationResult importArchetypesFromOpenAPI(MultipartFile file, String subsystem) {
-        ArchetypeCreationResult archetypeCreationResult;
+    public ArchetypeHandlingResult importArchetypesFromOpenAPI(MultipartFile file, String subsystem) {
+        ArchetypeHandlingResult archetypeHandlingResult;
         try {
             // Parsing file content (json or yaml) into OpenAPI Object
             SwaggerParseResult parsedOpenAPI = new OpenAPIParser().readContents(new String(file.getBytes()), List.of(), null);
@@ -53,14 +49,14 @@ public class ArchetypeService {
             List<ArchetypeEntity> archetypeEntities = OpenAPIExtractor.extractArchetype(parsedOpenAPI.getOpenAPI(), subsystem);
             archetypeEntities.forEach(entity -> entity.setTags(mockTagService.validateResourceTags(entity.getTags())));
 
-            // Filter only the archetypes that are not aòready present in DB
+            // Filter only the archetypes that are not already present in DB
             List<ArchetypeEntity> newArchetypeEntites = archetypeEntities.stream()
                     .filter(entity -> archetypeRepository.findBySubsystemUrlAndResourceUrlAndHttpMethod(entity.getSubsystemUrl(), entity.getResourceUrl(), entity.getHttpMethod()).isEmpty())
                     .collect(Collectors.toList());
 
             // Save the generated resource
             newArchetypeEntites = archetypeRepository.saveAll(newArchetypeEntites);
-            archetypeCreationResult = ArchetypeCreationResult.builder()
+            archetypeHandlingResult = ArchetypeHandlingResult.builder()
                     .generatedArchetypes(newArchetypeEntites.size())
                     .subsystemURL(subsystem)
                     .build();
@@ -72,7 +68,38 @@ public class ArchetypeService {
             log.error("An error occurred while trying to persist a list of archetypes. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
         }
-        return archetypeCreationResult;
+        return archetypeHandlingResult;
+    }
+
+
+    public Archetype getArchetype(String archetypeId) {
+        ArchetypeEntity archetypeEntity;
+        try {
+            archetypeEntity = archetypeRepository.findById(archetypeId)
+                    .orElseThrow(() -> new AppException(AppError.ARCHETYPE_NOT_FOUND, archetypeId));
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to retrieve the detail of an archetype. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return modelMapper.map(archetypeEntity, Archetype.class);
+    }
+
+
+    public ArchetypeHandlingResult deleteByCriteria(String subsystem) {
+        ArchetypeHandlingResult archetypeHandlingResult;
+        try {
+            // TODO temporary, deletion only by subsystem
+            List<ArchetypeEntity> archetypeEntities = archetypeRepository.findBySubsystemUrl(subsystem);
+            archetypeRepository.deleteAll(archetypeEntities);
+            archetypeHandlingResult = ArchetypeHandlingResult.builder()
+                    .generatedArchetypes(archetypeEntities.size())
+                    .subsystemURL(subsystem)
+                    .build();
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to delete archetypes by criteria. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return archetypeHandlingResult;
     }
 
     public MockResource createMockResourceFromArchetype(String archetypeId, MockResourceFromArchetype mockResourceFromArchetype) {
@@ -111,4 +138,5 @@ public class ArchetypeService {
         }
         return response;
     }
+
 }
