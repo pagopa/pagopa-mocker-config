@@ -1,4 +1,4 @@
-package it.gov.pagopa.mockconfig.model.mockresource.validator;
+package it.gov.pagopa.mockconfig.util.validation;
 
 import it.gov.pagopa.mockconfig.exception.AppError;
 import it.gov.pagopa.mockconfig.exception.AppException;
@@ -21,14 +21,12 @@ public class MockResourceValidation {
         if (alreadAssignedOrderCardinality.contains(order)) {
             throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_RULE_ORDER);
         }
-        alreadAssignedOrderCardinality.add(order);
     }
 
     public static void checkConditionOrderDuplication(Set<Integer> alreadAssignedOrderCardinality, Integer order, String mockRuleName) {
         if (alreadAssignedOrderCardinality.contains(order)) {
             throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_CONDITION_ORDER, mockRuleName);
         }
-        alreadAssignedOrderCardinality.add(order);
     }
 
     public static void checkContentTypeCongruency(MockCondition mockCondition, String mockRuleName) {

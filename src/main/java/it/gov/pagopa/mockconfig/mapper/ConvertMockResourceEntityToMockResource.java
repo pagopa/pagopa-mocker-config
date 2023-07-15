@@ -52,7 +52,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                     .name(srcRule.getName())
                     .order(srcRule.getOrder())
                     .isActive(srcRule.isActive())
-                    .tags(Optional.ofNullable(srcRule.getTags()).orElse(List.of()).stream().map(TagEntity::getValue).collect(Collectors.toList()))
+                    .tags(Optional.ofNullable(srcRule.getTags()).orElse(List.of()).stream().map(RuleTagEntity::getValue).collect(Collectors.toList()))
                     .conditions(conditions)
                     .response(response)
                     .build();
@@ -67,7 +67,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                 .resourceURL(source.getResourceUrl())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
-                .tags(Optional.ofNullable(source.getTags()).orElse(List.of()).stream().map(TagEntity::getValue).collect(Collectors.toList()))
+                .tags(Optional.ofNullable(source.getTags()).orElse(List.of()).stream().map(ResourceTagEntity::getValue).collect(Collectors.toList()))
                 .rules(rules);
 
         return builder.build();

@@ -3,11 +3,9 @@ package it.gov.pagopa.mockconfig.service;
 import it.gov.pagopa.mockconfig.entity.*;
 import it.gov.pagopa.mockconfig.exception.AppError;
 import it.gov.pagopa.mockconfig.exception.AppException;
-import it.gov.pagopa.mockconfig.model.enumeration.ConditionType;
 import it.gov.pagopa.mockconfig.model.mockresource.*;
-import it.gov.pagopa.mockconfig.model.mockresource.validator.MockResourceValidation;
 import it.gov.pagopa.mockconfig.repository.MockResourceRepository;
-import it.gov.pagopa.mockconfig.repository.TagRepository;
+import it.gov.pagopa.mockconfig.util.validation.RequestSemanticValidator;
 import it.gov.pagopa.mockconfig.util.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,9 +24,9 @@ import java.util.stream.Collectors;
 @Transactional
 public class MockResourceService {
 
-    @Autowired private MockResourceRepository mockResourceRepository;
+    @Autowired private MockTagService mockTagService;
 
-    @Autowired private TagRepository tagRepository;
+    @Autowired private MockResourceRepository mockResourceRepository;
 
     @Autowired private ModelMapper modelMapper;
 
@@ -52,11 +48,11 @@ public class MockResourceService {
                 .build();
     }
 
-    public MockResource getMockResource(String resourceId) {
+    public MockResource getMockResource(Long id) {
         MockResourceEntity mockResourceEntity;
         try {
-            mockResourceEntity = mockResourceRepository.findById(resourceId)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+            mockResourceEntity = mockResourceRepository.findById(id)
+                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve the detail of a mock resource. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
@@ -69,11 +65,11 @@ public class MockResourceService {
         try {
 
             // check request semantic validity
-            checkRequestSemanticValidity(mockResource);
+            RequestSemanticValidator.validate(mockResource);
 
             // Search if the resource already exists
-            String resourceId = Utility.generateResourceId(mockResource);
-            mockResourceRepository.findByResourceId(resourceId).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, resourceId); });
+            Long id = Utility.generateResourceId(mockResource);
+            mockResourceRepository.findById(id).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id); });
 
             // Persisting the mock resource
             response = persistMockResource(mockResource);
@@ -85,24 +81,24 @@ public class MockResourceService {
         return response;
     }
 
-    public MockResource updateMockResource(String resourceId, MockResource mockResource) {
+    public MockResource updateMockResource(Long id, MockResource mockResource) {
         MockResource response;
         try {
 
             // check request semantic validity
-            checkRequestSemanticValidity(mockResource);
+            RequestSemanticValidator.validate(mockResource);
 
-            // Search if the resource exists
-            String generatedResourceId = Utility.generateResourceId(mockResource);
-            MockResourceEntity mockResourceEntity = mockResourceRepository.findByResourceId(generatedResourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
 
             // Check if passed resource identifier is equals to the one generable by body content
-            if (!mockResourceEntity.getId().equals(resourceId)) {
-                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID, resourceId, mockResourceEntity.getId());
+            Long generatedId = Utility.generateResourceId(mockResource);
+            if (!generatedId.equals(id)) {
+                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID, id, generatedId);
             }
 
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
             if (!mockResourceEntity.getResourceUrl().equals(mockResource.getResourceURL()) || !mockResourceEntity.getSubsystemUrl().equals(mockResource.getSubsystem())) {
-                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_URL, resourceId, mockResourceEntity.getId());
+                throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_URL, id, mockResourceEntity.getId());
             }
 
             // delete the old resource, the new one will replace this resource
@@ -118,10 +114,10 @@ public class MockResourceService {
         return response;
     }
 
-    public void deleteMockResource(String resourceId) {
+    public void deleteMockResource(Long id) {
         try {
-            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id)
+                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
             mockResourceRepository.delete(mockResourceEntity);
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to delete a mock resource. ", e);
@@ -129,59 +125,15 @@ public class MockResourceService {
         }
     }
 
-    public void importMockResourcesFromOpenAPI() {
-
-    }
-
-    private void checkRequestSemanticValidity(MockResource mockResource) {
-
-        Set<Integer> assignedRuleOrderCardinality = new HashSet<>();
-        for (MockRule mockRule : mockResource.getRules()) {
-
-            String mockRuleName = mockRule.getName();
-
-            // check if there is a duplicate value on rule order value
-            int ruleOrder = mockRule.getOrder();
-            MockResourceValidation.checkRuleOrderDuplication(assignedRuleOrderCardinality, ruleOrder);
-
-            Set<Integer> assignedConditionOrderCardinality = new HashSet<>();
-            for (MockCondition mockCondition : mockRule.getConditions()) {
-
-                // check if there is a duplicate value on condition order value
-                int conditionOrder = mockCondition.getOrder();
-                MockResourceValidation.checkConditionOrderDuplication(assignedConditionOrderCardinality, conditionOrder, mockRuleName);
-
-                // check if the content type JSON,XML will be evaluated as other than body
-                MockResourceValidation.checkContentTypeCongruency(mockCondition, mockRuleName);
-
-                // check if there aren't the following cases: condition_value=null in non-nullable condition, condition_value=non-null in unary condition
-                MockResourceValidation.checkConditionCongruency(mockCondition, mockRuleName);
-
-                // check, if condition type is regex evaluation, if the pattern is correct
-                MockResourceValidation.checkRegexValidity(mockCondition, mockRuleName);
-            }
-
-            // check if the body response is a valid Base64 content
-            MockResourceValidation.checkBodyEncoding(mockRule);
-        }
-    }
-
     private MockResource persistMockResource(MockResource mockResource) {
         // Map entity from input model, setting id and tags and completing the entities' tree
         MockResourceEntity mockResourceEntity = modelMapper.map(mockResource, MockResourceEntity.class);
-        mockResourceEntity.setTags(validateTags(mockResourceEntity.getTags()));
-        mockResourceEntity.getRules().forEach(rule -> rule.setTags(validateTags(rule.getTags())));
+        mockResourceEntity.setTags(mockTagService.validateResourceTags(mockResourceEntity.getTags()));
+        mockResourceEntity.getRules().forEach(rule -> rule.setTags(mockTagService.validateRuleTags(rule.getTags())));
 
         // Save the converted resource
         mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
         return modelMapper.map(mockResourceEntity, MockResource.class);
     }
 
-    private List<TagEntity> validateTags(List<TagEntity> tagEntities) {
-        List<TagEntity> validTags = new LinkedList<>();
-        for (TagEntity tagEntity : tagEntities) {
-            validTags.add(tagRepository.findByValue(tagEntity.getValue()).orElseGet(() -> tagRepository.save(tagEntity)));
-        }
-        return validTags;
-    }
 }

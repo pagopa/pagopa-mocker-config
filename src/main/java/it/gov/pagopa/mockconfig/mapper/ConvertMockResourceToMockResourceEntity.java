@@ -20,16 +20,14 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
     public MockResourceEntity convert(MappingContext<MockResource, MockResourceEntity> mappingContext) {
         MockResource mockResource = mappingContext.getSource();
 
-        mockResource.setIdIfNull(Utility.generateUUID());
         MockResourceEntity mockResourceEntity = MockResourceEntity.builder()
-                .id(mockResource.getId())
-                .resourceId(Utility.generateResourceId(mockResource))
+                .id(Utility.generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL()))
                 .name(mockResource.getName())
                 .subsystemUrl(mockResource.getSubsystem())
                 .resourceUrl(mockResource.getResourceURL())
                 .httpMethod(mockResource.getHttpMethod())
                 .isActive(mockResource.getIsActive())
-                .tags(buildTagEntities(mockResource.getTags()))
+                .tags(buildResourceTagEntities(mockResource.getTags()))
                 .build();
 
         List<MockRuleEntity> ruleEntities = new LinkedList<>();
@@ -47,11 +45,24 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
         return mockResourceEntity;
     }
 
-    private List<TagEntity> buildTagEntities(List<String> tags) {
-        List<TagEntity> tagEntities = new ArrayList<>();
+    private List<ResourceTagEntity> buildResourceTagEntities(List<String> tags) {
+        List<ResourceTagEntity> tagEntities = new ArrayList<>();
         for (String tag : tags) {
             tagEntities.add(
-                    TagEntity.builder()
+                    ResourceTagEntity.builder()
+                            .id(Utility.generateUUID())
+                            .value(tag)
+                            .build()
+            );
+        }
+        return tagEntities;
+    }
+
+    private List<RuleTagEntity> buildRuleTagEntities(List<String> tags) {
+        List<RuleTagEntity> tagEntities = new ArrayList<>();
+        for (String tag : tags) {
+            tagEntities.add(
+                    RuleTagEntity.builder()
                             .id(Utility.generateUUID())
                             .value(tag)
                             .build()
@@ -71,7 +82,7 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                 .response(mockResponseEntity)
                 .resourceId(mockResourceEntity.getId())
                 .resource(mockResourceEntity)
-                .tags(buildTagEntities(mockRule.getTags()))
+                .tags(buildRuleTagEntities(mockRule.getTags()))
                 .build();
     }
 

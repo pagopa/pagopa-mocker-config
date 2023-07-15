@@ -12,6 +12,7 @@ import it.gov.pagopa.mockconfig.model.ProblemJson;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
 import it.gov.pagopa.mockconfig.service.MockResourceService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -29,6 +31,8 @@ import javax.validation.constraints.*;
 @Tag(name = "Mock Resources", description = "Everything about Mock Resources")
 @Validated
 public class MockResourceController {
+
+    @Autowired private ModelMapper modelMapper;
 
     @Autowired
     private MockResourceService mockResourceService;
@@ -77,7 +81,7 @@ public class MockResourceController {
     @GetMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<MockResource> getMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") String resourceId) {
+            @NotBlank @PathVariable("resourceId") Long resourceId) {
         return ResponseEntity.ok(mockResourceService.getMockResource(resourceId));
     }
 
@@ -122,7 +126,7 @@ public class MockResourceController {
     @PutMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<MockResource> updateMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") String resourceId,
+            @NotBlank @PathVariable("resourceId") Long resourceId,
             @RequestBody @Valid @NotNull MockResource mockResource) {
         return ResponseEntity.ok(mockResourceService.updateMockResource(resourceId, mockResource));
     }
@@ -146,30 +150,8 @@ public class MockResourceController {
     @DeleteMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> deleteMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") String resourceId) {
+            @NotBlank @PathVariable("resourceId") Long resourceId) {
         mockResourceService.deleteMockResource(resourceId);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(
-            summary = "Create multiple mock resources from OpenAPI specification",
-            security = {
-                    @SecurityRequirement(name = "ApiKey"),
-                    @SecurityRequirement(name = "Authorization")
-            },
-            tags = {"Mock Resources"}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
-            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
-    })
-    @PostMapping(value = "/import", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<MockResource> createMockResource() {
-        mockResourceService.importMockResourcesFromOpenAPI();
         return ResponseEntity.ok().build();
     }
 }

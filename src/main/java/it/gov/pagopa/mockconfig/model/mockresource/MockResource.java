@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -30,8 +31,8 @@ import java.util.List;
 public class MockResource implements Serializable {
 
     @JsonProperty("id")
-    @Schema(description = "The unique identifier of the mock resource.", example = "70aa0abb-0001-0212-aa01-2cb1a0f00301")
-    private String id;
+    @Schema(description = "The unique identifier of the mock resource.", example = "3263615463")
+    private Long id;
 
     @JsonProperty("name")
     @Schema(description = "The name or description related to the mock resources, for human readability.", example = "Get enrolled organization with ID 77777777777")
@@ -68,11 +69,4 @@ public class MockResource implements Serializable {
     @NotNull(message = "The list of rules to be assigned the mock resource cannot be null.")
     @Valid
     private List<MockRule> rules;
-
-    @Hidden
-    public void setIdIfNull(String id) {
-        if (this.id == null) {
-            this.id = id;
-        }
-    }
 }

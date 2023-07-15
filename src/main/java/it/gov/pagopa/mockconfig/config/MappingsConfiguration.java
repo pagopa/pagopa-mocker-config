@@ -3,6 +3,7 @@ package it.gov.pagopa.mockconfig.config;
 import it.gov.pagopa.mockconfig.entity.MockResourceEntity;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceEntityToMockResource;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceToMockResourceEntity;
+import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;

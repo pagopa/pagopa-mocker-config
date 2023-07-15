@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Entity
-@Table(name = "tag")
-public class TagEntity implements Serializable {
+@Table(name = "rule_tag")
+public class RuleTagEntity implements Serializable {
 
     @Id
     @Column(name = "id")
@@ -20,12 +20,6 @@ public class TagEntity implements Serializable {
 
     @Column(name = "value")
     private String value;
-
-    @ManyToMany(targetEntity = MockResourceEntity.class)
-    @JoinTable(name = "mock_resource_tag",
-            joinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "mock_resource_id", referencedColumnName = "id")})
-    private List<MockResourceEntity> resources;
 
     @ManyToMany(targetEntity = MockRuleEntity.class)
     @JoinTable(name = "mock_rule_tag",

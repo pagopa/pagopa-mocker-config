@@ -5,6 +5,7 @@ import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import org.springframework.data.domain.Page;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 public class Utility {
@@ -24,11 +25,20 @@ public class Utility {
     return UUID.randomUUID().toString();
   }
 
-  public static String generateResourceId(MockResource mockResource) {
-    return String.format(Constants.RESOURCE_ID_TEMPLATE, mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL())
-            .toLowerCase()
-            .replaceAll("[\\\\/\\-_]+", "");
+  public static long generateResourceId(MockResource mockResource) {
+    return generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL());
   }
 
-
+  public static long generateResourceId(HttpMethod httpMethod, String subsystem, String resourceURL) {
+    String refactoredResourceId = String.format(Constants.RESOURCE_ID_TEMPLATE, httpMethod, subsystem, resourceURL)
+            .toLowerCase()
+            .replaceAll("[\\\\/]+", "");
+    long hashValue = 0;
+    long pPow = 1;
+    for (char c : refactoredResourceId.toCharArray()) {
+      hashValue = (hashValue + (c - 'a' + 1) * pPow) % Constants.M_HASHING_VALUE;
+      pPow = (pPow * Constants.P_HASHING_VALUE) % Constants.M_HASHING_VALUE;
+    }
+    return hashValue & 0xffffffffL;
+  }
 }
