@@ -252,6 +252,12 @@ public class OpenAPIExtractor {
                         bodyContent = extractJSONFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
                         break;
 
+                    // generate the JSON response body
+                    case "application/xml":
+                    case "text/xml":
+                        bodyContent = extractXMLFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
+                        break;
+
                     // generate raw data for plain text and binary data
                     case "text/plain":
                     case "application/octet-stream":
@@ -278,6 +284,21 @@ public class OpenAPIExtractor {
             String className = schema.get$ref();
             if (className != null) {
                 String plainContent = convertRawClassToJSON(rawClasses, className.substring(className.lastIndexOf("/") + 1));
+                bodyContent = Base64.getEncoder().encodeToString(plainContent.getBytes());
+            }
+        }
+        return bodyContent;
+    }
+
+    private static String extractXMLFromReferencedClass(MediaType contentMediaType, Map<String, Map<String, Schema>> rawClasses) {
+        String bodyContent = null;
+        Schema schema = contentMediaType.getSchema();
+        if (schema != null) {
+
+            // get class reference: if it exists, get the class and convert it to a valid JSON content
+            String className = schema.get$ref();
+            if (className != null) {
+                String plainContent = convertRawClassToXML(rawClasses, className.substring(className.lastIndexOf("/") + 1));
                 bodyContent = Base64.getEncoder().encodeToString(plainContent.getBytes());
             }
         }
@@ -349,6 +370,70 @@ public class OpenAPIExtractor {
 
             // JSON ending charachter
             stringBuilder.append("}");
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String convertRawClassToXML(Map<String, Map<String, Schema>> rawClasses, String className) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // get raw class from passed class name: if exists, execute the conversion
+        Map<String, Schema> rawClass = rawClasses.get(className);
+        if (rawClass != null) {
+
+            // XML starting character
+            stringBuilder.append("<").append(className).append(">");
+
+            List<Map.Entry<String, Schema>> orderedParameters = new ArrayList<>(rawClass.entrySet());
+            orderedParameters.sort(Map.Entry.comparingByKey());
+            Iterator<Map.Entry<String, Schema>> it = orderedParameters.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Schema> entry = it.next();
+
+                // extracted needed parameters
+                String parameterName = entry.getKey();
+                Schema classSchema = entry.getValue();
+
+                // extract and insert the parameter name (left section of the parameter)
+                stringBuilder.append("<").append(parameterName).append(">");
+
+                // construct the correct object from the nested schema type
+                String type = classSchema.getType();
+
+                if (type != null) {
+                    switch (type) {
+
+                        // if type of the nested schema is an array, extract the JSON object recursively and encapsulate it in squared brackets
+                        case "array":
+                            stringBuilder.append("<").append(parameterName).append(">")
+                                    .append(convertRawClassToXML(rawClasses, getNestedClassNameFromSchema(classSchema)))
+                                    .append("</").append(parameterName).append(">");
+                            break;
+
+                        // if type of the nested schema is a primitive type (integer, boolean, etc), set the parameter name as injectable parameter but not included in " characters
+                        default:
+                            stringBuilder.append("${").append(parameterName).append("}");
+                            break;
+                    }
+                }
+
+                // if the nested schema is a complex type, extract the JSON object recursively
+                else if (classSchema.getItems() != null) {
+                    stringBuilder.append(convertRawClassToXML(rawClasses, getNestedClassNameFromSchema(classSchema)));
+                }
+
+                // if the nested schema is a complex type referenced directly to object, extract the JSON object recursively
+                else if (classSchema.get$ref() != null) {
+                    stringBuilder.append(convertRawClassToXML(rawClasses, getClassNameFromReference(classSchema.get$ref())));
+                }
+
+                // add comma if not last parameter
+                stringBuilder.append("</").append(parameterName).append(">");
+            }
+
+            // JSON ending charachter
+            stringBuilder.append("</").append(className).append(">");
         }
         return stringBuilder.toString();
     }
