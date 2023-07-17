@@ -52,4 +52,12 @@ public class Utility {
             .map(res -> res.group(1))
             .collect(Collectors.toList());
   }
+
+  public static List<String> extractURLParameters(String url) {
+    return Pattern.compile("\\{([a-zA-Z0-9_-]+)\\}")
+            .matcher(url)
+            .results()
+            .map(res -> res.group(1))
+            .collect(Collectors.toList());
+  }
 }

@@ -7,7 +7,9 @@ import it.gov.pagopa.mockconfig.exception.AppError;
 import it.gov.pagopa.mockconfig.exception.AppException;
 import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceFromArchetypeToMockResource;
 import it.gov.pagopa.mockconfig.model.archetype.*;
+import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
+import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
 import it.gov.pagopa.mockconfig.repository.ArchetypeRepository;
 import it.gov.pagopa.mockconfig.repository.MockResourceRepository;
 import it.gov.pagopa.mockconfig.util.OpenAPIExtractor;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +75,23 @@ public class ArchetypeService {
         return archetypeHandlingResult;
     }
 
+    public ArchetypeList getArchetypes(Pageable pageable) {
+        List<Archetype> archetypes;
+        Page<ArchetypeEntity> archetypePaginatedEntities;
+        try {
+            archetypePaginatedEntities = archetypeRepository.findAll(pageable);
+            archetypes = archetypePaginatedEntities.stream()
+                    .map(archetype -> modelMapper.map(archetype, Archetype.class))
+                    .collect(Collectors.toList());
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to retrieve a list of archetypes. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return ArchetypeList.builder()
+                .archetypes(archetypes)
+                .pageInfo(Utility.buildPageInfo(archetypePaginatedEntities))
+                .build();
+    }
 
     public Archetype getArchetype(String archetypeId) {
         ArchetypeEntity archetypeEntity;
@@ -82,6 +103,30 @@ public class ArchetypeService {
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
         }
         return modelMapper.map(archetypeEntity, Archetype.class);
+    }
+
+    public Archetype createArchetype(Archetype archetype) {
+        Archetype response;
+        try {
+
+            // check request semantic validity
+            RequestSemanticValidator.validate(archetype);
+
+            // Search if the archetype already exists
+            String subsystem = archetype.getSubsystem();
+            String resourceUrl = archetype.getResourceURL();
+            HttpMethod httpMethod = archetype.getHttpMethod();
+            archetypeRepository.findBySubsystemUrlAndResourceUrlAndHttpMethod(subsystem, resourceUrl, httpMethod)
+                    .ifPresent(res -> {throw new AppException(AppError.ARCHETYPE_CONFLICT, httpMethod ,subsystem + resourceUrl); });
+
+            // Persisting the archetype
+            response = persistArchetype(archetype);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to create an archetype. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
     }
 
 
@@ -137,6 +182,16 @@ public class ArchetypeService {
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
         }
         return response;
+    }
+
+    private Archetype persistArchetype(Archetype archetype) {
+        // Map entity from input model, setting id and tags and completing the entities' tree
+        ArchetypeEntity archetypeEntity = modelMapper.map(archetype, ArchetypeEntity.class);
+        archetypeEntity.setTags(mockTagService.validateResourceTags(archetypeEntity.getTags()));
+
+        // Save the converted resource
+        archetypeEntity = archetypeRepository.save(archetypeEntity);
+        return modelMapper.map(archetypeEntity, Archetype.class);
     }
 
 }

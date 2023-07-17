@@ -1,6 +1,8 @@
 package it.gov.pagopa.mockconfig.util.validation;
 
 import it.gov.pagopa.mockconfig.entity.ArchetypeEntity;
+import it.gov.pagopa.mockconfig.model.archetype.Archetype;
+import it.gov.pagopa.mockconfig.model.archetype.ArchetypeResponse;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockRuleFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockCondition;
@@ -8,6 +10,8 @@ import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
 import it.gov.pagopa.mockconfig.model.mockresource.MockRule;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class RequestSemanticValidator {
@@ -47,6 +51,26 @@ public class RequestSemanticValidator {
             // check if the body response is a valid Base64 content
             MockResourceValidation.checkBodyEncoding(mockRule);
         }
+    }
+
+    public static void validate(Archetype archetype) {
+
+        // check if url parameters are all set
+        ArchetypeValidation.checkURLParameters(archetype);
+
+        List<Integer> httpCodes = new LinkedList<>();
+        for (ArchetypeResponse response : archetype.getResponses()) {
+
+            // add HTTP code for future evaluation
+            httpCodes.add(response.getStatus());
+
+            // check if the body response is a valid Base64 content
+            MockResourceValidation.checkBodyEncoding(response.getBody());
+        }
+
+        // check if there are not multiple responses for same HTTP code
+        ArchetypeValidation.checkUniqueHttpCodes(httpCodes);
+
     }
 
     public static void validate(MockResourceFromArchetype mockResourceFromArchetype, ArchetypeEntity archetypeEntity) {
