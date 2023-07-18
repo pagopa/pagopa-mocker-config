@@ -153,7 +153,7 @@ public class ArchetypeController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
     })
-    @PutMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(value = "/{archetypeId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Archetype> updateArchetype(
             @Parameter(description = "The identifier related to the archetype", required = true)
             @NotBlank @PathVariable("archetypeId") String archetypeId,
