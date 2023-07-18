@@ -24,7 +24,7 @@ public class ConvertArchetypeEntityToArchetype implements Converter<ArchetypeEnt
 
         List<ArchetypeResponse> responses = new LinkedList<>();
         for (ArchetypeResponseEntity archetypeResponseEntity : source.getResponses()) {
-            String body = archetypeResponseEntity.getBody();
+            String body = archetypeResponseEntity.getSchema() != null ? archetypeResponseEntity.getSchema().getContent() : null;
             responses.add(ArchetypeResponse.builder()
                     .id(archetypeResponseEntity.getId())
                     .body(body)
@@ -40,8 +40,6 @@ public class ConvertArchetypeEntityToArchetype implements Converter<ArchetypeEnt
                     .build()
             );
         }
-
-
 
         return Archetype.builder()
                 .id(source.getId())

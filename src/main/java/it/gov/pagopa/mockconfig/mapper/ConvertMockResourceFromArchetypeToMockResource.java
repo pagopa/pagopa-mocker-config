@@ -107,9 +107,13 @@ public class ConvertMockResourceFromArchetypeToMockResource {
     }
 
     private static String reformatResponseBody(ArchetypeResponseEntity archetypeResponseEntity, MockRuleFromArchetype mockRuleFromArchetype) {
-        String body = new String(Base64.getDecoder().decode(archetypeResponseEntity.getBody().getBytes()));
-        for (StaticParameterValue staticValue : mockRuleFromArchetype.getResponse().getStaticValues()) {
-            body = body.replaceAll("\\$\\{" + staticValue.getName() + "\\}", staticValue.getValue());
+        String body = null;
+        ArchetypeSchemaEntity schema = archetypeResponseEntity.getSchema();
+        if (schema != null) {
+            body = new String(Base64.getDecoder().decode(schema.getContent().getBytes()));
+            for (StaticParameterValue staticValue : mockRuleFromArchetype.getResponse().getStaticValues()) {
+                body = body.replaceAll("\\$\\{" + staticValue.getName() + "\\}", staticValue.getValue());
+            }
         }
         return body;
     }

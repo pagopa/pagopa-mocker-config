@@ -21,14 +21,18 @@ public class ArchetypeResponseEntity implements Serializable {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "body")
-    private String body;
-
     @Column(name = "status")
     private int status;
 
     @Column(name = "archetype_id", insertable = false, updatable = false)
     private String archetypeId;
+
+    @Column(name = "schema_id", insertable = false, updatable = false)
+    private String schemaId;
+
+    @OneToOne(targetEntity = ArchetypeSchemaEntity.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "schema_id")
+    private ArchetypeSchemaEntity schema;
 
     @OneToMany(targetEntity = ArchetypeResponseHeaderEntity.class, fetch = FetchType.LAZY, mappedBy = "response", cascade = CascadeType.ALL)
     private List<ArchetypeResponseHeaderEntity> headers;

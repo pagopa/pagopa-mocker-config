@@ -88,7 +88,6 @@ public class MockResourceService {
             // check request semantic validity
             RequestSemanticValidator.validate(mockResource);
 
-
             // Check if passed resource identifier is equals to the one generable by body content
             Long generatedId = Utility.generateResourceId(mockResource);
             if (!generatedId.equals(id)) {
