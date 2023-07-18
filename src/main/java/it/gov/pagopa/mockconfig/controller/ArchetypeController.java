@@ -14,7 +14,6 @@ import it.gov.pagopa.mockconfig.model.archetype.ArchetypeHandlingResult;
 import it.gov.pagopa.mockconfig.model.archetype.ArchetypeList;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
-import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
 import it.gov.pagopa.mockconfig.service.ArchetypeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

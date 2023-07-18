@@ -265,14 +265,14 @@ public class OpenAPIExtractor {
                     // generate the JSON response body
                     case "application/json":
                         bodyContent = extractJSONFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
-                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse("") : "");
+                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse(schema.getType()) : "");
                         break;
 
                     // generate the JSON response body
                     case "application/xml":
                     case "text/xml":
                         bodyContent = extractXMLFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
-                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse("") : "");
+                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse(schema.getType()) : "");
                         break;
 
                     // generate raw data for plain text and binary data
@@ -303,6 +303,8 @@ public class OpenAPIExtractor {
             if (className != null) {
                 String plainContent = convertRawClassToJSON(rawClasses, className.substring(className.lastIndexOf("/") + 1), null);
                 bodyContent = Base64.getEncoder().encodeToString(plainContent.getBytes());
+            } else {
+                bodyContent = Base64.getEncoder().encodeToString("${content}".getBytes());
             }
         }
         return bodyContent;
@@ -318,6 +320,8 @@ public class OpenAPIExtractor {
             if (className != null) {
                 String plainContent = convertRawClassToXML(rawClasses, className.substring(className.lastIndexOf("/") + 1));
                 bodyContent = Base64.getEncoder().encodeToString(plainContent.getBytes());
+            } else {
+                bodyContent = Base64.getEncoder().encodeToString("${content}".getBytes());
             }
         }
         return bodyContent;
