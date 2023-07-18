@@ -36,13 +36,23 @@ CREATE TABLE mocker.archetype_tag (
 	CONSTRAINT archetype_tag_tag_fk FOREIGN KEY (tag_id) REFERENCES mocker.resource_tag(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE mocker.archetype_schema (
+    id varchar NOT NULL,
+	name varchar NOT NULL,
+	subsystem varchar NOT NULL,
+	content varchar NOT NULL,
+	CONSTRAINT archetype_schema_pk PRIMARY KEY (id),
+	CONSTRAINT archetype_schema_u UNIQUE (name, subsystem)
+);
+
 CREATE TABLE mocker.archetype_response (
 	id varchar NOT NULL,
 	archetype_id varchar NOT NULL,
 	status int8 NOT NULL,
-	body varchar,
+	schema_id varchar,
 	CONSTRAINT archetype_response_pk PRIMARY KEY (id),
-	CONSTRAINT archetype_response_archetype_fk FOREIGN KEY (archetype_id) REFERENCES mocker.archetype(id) ON DELETE CASCADE ON UPDATE CASCADE
+	CONSTRAINT archetype_response_archetype_fk FOREIGN KEY (archetype_id) REFERENCES mocker.archetype(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT archetype_response_archetype_schema_fk FOREIGN KEY (schema_id) REFERENCES mocker.archetype_schema(id) ON DELETE SET NULL ON UPDATE SET NULL
 );
 
 CREATE TABLE mocker.archetype_response_header (
