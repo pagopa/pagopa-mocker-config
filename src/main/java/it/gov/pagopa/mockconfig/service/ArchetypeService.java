@@ -178,7 +178,7 @@ public class ArchetypeService {
         try {
 
             // Search if the archetype exists
-            ArchetypeEntity archetypeEntity = archetypeRepository.findById(archetypeId).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "", ""));
+            ArchetypeEntity archetypeEntity = archetypeRepository.findById(archetypeId).orElseThrow(() -> new AppException(AppError.ARCHETYPE_NOT_FOUND, archetypeId));
 
             // check request semantic validity
             RequestSemanticValidator.validate(mockResourceFromArchetype, archetypeEntity);
