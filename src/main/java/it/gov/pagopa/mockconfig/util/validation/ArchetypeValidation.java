@@ -60,4 +60,13 @@ public class ArchetypeValidation {
             throw new AppException(AppError.ARCHETYPE_BAD_REQUEST_MULTIPLE_RESPONSE_WITH_SAME_HTTPCODE);
         }
     }
+
+    public static void checkURLCongruency(Archetype archetype, ArchetypeEntity archetypeEntity) {
+        boolean isWrong = !archetypeEntity.getSubsystemUrl().equals(archetype.getSubsystem()) ||
+                !archetypeEntity.getResourceUrl().equals(archetype.getResourceURL()) ||
+                !archetypeEntity.getHttpMethod().equals(archetype.getHttpMethod());
+        if (isWrong) {
+            throw new AppException(AppError.ARCHETYPE_BAD_REQUEST_INVALID_RESOURCE_URL);
+        }
+    }
 }

@@ -11,11 +11,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.gov.pagopa.mockconfig.model.ProblemJson;
 import it.gov.pagopa.mockconfig.model.archetype.Archetype;
 import it.gov.pagopa.mockconfig.model.archetype.ArchetypeHandlingResult;
+import it.gov.pagopa.mockconfig.model.archetype.ArchetypeList;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
+import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
 import it.gov.pagopa.mockconfig.service.ArchetypeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,12 +68,36 @@ public class ArchetypeController {
     }
 
     @Operation(
+            summary = "Get paginated list of archetypes",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Archetypes"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ArchetypeList.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @GetMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ArchetypeList> getArchetypes(
+            @Parameter(description = "The number of elements to be included in the page.", required = true)
+            @Valid @RequestParam(required = false, defaultValue = "10") @Positive @Max(999) Integer limit,
+            @Parameter(description = "The index of the page, starting from 0.", required = true)
+            @Valid @Min(0) @RequestParam(required = false, defaultValue = "0") Integer page) {
+        return ResponseEntity.ok(archetypeService.getArchetypes(PageRequest.of(page, limit)));
+    }
+
+    @Operation(
             summary = "Get detail of a single archetype",
             security = {
                     @SecurityRequirement(name = "ApiKey"),
                     @SecurityRequirement(name = "Authorization")
             },
-            tags = {"Mock Resources"}
+            tags = {"Archetypes"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Archetype.class))),
@@ -87,6 +114,52 @@ public class ArchetypeController {
         return ResponseEntity.ok(archetypeService.getArchetype(archetypeId));
     }
 
+
+    @Operation(
+            summary = "Create a new archetype",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Archetypes"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Archetype.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @PostMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Archetype> createArchetype(
+            @RequestBody @Valid @NotNull Archetype archetype) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(archetypeService.createArchetype(archetype));
+    }
+
+    @Operation(
+            summary = "Update an existing archetype",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Archetypes"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Archetype.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @PutMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Archetype> updateArchetype(
+            @Parameter(description = "The identifier related to the archetype", required = true)
+            @NotBlank @PathVariable("archetypeId") String archetypeId,
+            @RequestBody @Valid @NotNull Archetype archetype) {
+        return ResponseEntity.ok(archetypeService.updateArchetype(archetypeId, archetype));
+    }
 
     @Operation(
             summary = "Delete all existing archetypes by criteria",

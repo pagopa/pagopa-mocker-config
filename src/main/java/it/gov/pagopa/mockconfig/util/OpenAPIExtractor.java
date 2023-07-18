@@ -15,8 +15,8 @@ import it.gov.pagopa.mockconfig.entity.embeddable.ArchetypeResponseHeaderKey;
 import it.gov.pagopa.mockconfig.model.enumeration.ArchetypeParameterType;
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.*;
 
@@ -181,14 +181,27 @@ public class OpenAPIExtractor {
             // extracting the response
             List<ArchetypeResponseHeaderEntity> responseHeaderEntities = new LinkedList<>();
             ApiResponse response = responseEntry.getValue();
-            Pair<String, String> content = extractBodyContentFromReferencedClass(response, rawClasses);
+            Triple<String, String, String> content = extractBodyContentFromReferencedClass(response, rawClasses);
+
+            // generate the archetype schema
+            ArchetypeSchemaEntity archetypeSchema = null;
+            if (content.getRight() != null) {
+                archetypeSchema = ArchetypeSchemaEntity.builder()
+                        .id(Utility.generateUUID())
+                        .name(content.getMiddle()) // class name
+                        .subsystem(archetypeEntity.getSubsystemUrl())
+                        .content(content.getRight()) // class structure
+                        .build();
+            }
+
+            // generate archetype response
             ArchetypeResponseEntity archetypeResponseEntity = ArchetypeResponseEntity.builder()
-                    .id(UUID.randomUUID().toString())
-                    .body(content.getRight())
+                    .id(Utility.generateUUID())
                     .status(Integer.parseInt(responseEntry.getKey()))
                     .headers(responseHeaderEntities)
                     .archetypeId(archetypeEntity.getId())
                     .archetype(archetypeEntity)
+                    .schema(archetypeSchema)
                     .build();
 
             // extracting the headers
@@ -234,7 +247,8 @@ public class OpenAPIExtractor {
         return headerEntities;
     }
 
-    private static Pair<String, String> extractBodyContentFromReferencedClass(ApiResponse apiResponse, Map<String, Map<String, Schema>> rawClasses) {
+    private static Triple<String, String, String> extractBodyContentFromReferencedClass(ApiResponse apiResponse, Map<String, Map<String, Schema>> rawClasses) {
+        String schemaName = null;
         String bodyContent = apiResponse.get$ref();
         String contentType = "";
 
@@ -245,23 +259,27 @@ public class OpenAPIExtractor {
             for (Map.Entry<String, MediaType> contentMediaTypeEntry : apiResponse.getContent().entrySet()) {
 
                 contentType = contentMediaTypeEntry.getKey();
+                Schema schema = contentMediaTypeEntry.getValue().getSchema();
                 switch (contentMediaTypeEntry.getKey()) {
 
                     // generate the JSON response body
                     case "application/json":
                         bodyContent = extractJSONFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
+                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse("") : "");
                         break;
 
                     // generate the JSON response body
                     case "application/xml":
                     case "text/xml":
                         bodyContent = extractXMLFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
+                        schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse("") : "");
                         break;
 
                     // generate raw data for plain text and binary data
                     case "text/plain":
                     case "application/octet-stream":
-                        bodyContent = "${content}";
+                        bodyContent = Base64.getEncoder().encodeToString("${content}".getBytes());
+                        schemaName = "string";
                         break;
 
                     // generate the response body from another content-type (currently not supported)
@@ -272,7 +290,7 @@ public class OpenAPIExtractor {
             }
         }
 
-        return new ImmutablePair<>(contentType, bodyContent);
+        return new ImmutableTriple<>(contentType, schemaName, bodyContent);
     }
 
     private static String extractJSONFromReferencedClass(MediaType contentMediaType, Map<String, Map<String, Schema>> rawClasses) {
@@ -283,7 +301,7 @@ public class OpenAPIExtractor {
             // get class reference: if it exists, get the class and convert it to a valid JSON content
             String className = schema.get$ref();
             if (className != null) {
-                String plainContent = convertRawClassToJSON(rawClasses, className.substring(className.lastIndexOf("/") + 1));
+                String plainContent = convertRawClassToJSON(rawClasses, className.substring(className.lastIndexOf("/") + 1), null);
                 bodyContent = Base64.getEncoder().encodeToString(plainContent.getBytes());
             }
         }
@@ -305,7 +323,7 @@ public class OpenAPIExtractor {
         return bodyContent;
     }
 
-    private static String convertRawClassToJSON(Map<String, Map<String, Schema>> rawClasses, String className) {
+    private static String convertRawClassToJSON(Map<String, Map<String, Schema>> rawClasses, String className, String parameterName) {
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -323,11 +341,11 @@ public class OpenAPIExtractor {
                 Map.Entry<String, Schema> entry = it.next();
 
                 // extracted needed parameters
-                String parameterName = entry.getKey();
+                String entryParameterName = entry.getKey();
                 Schema classSchema = entry.getValue();
 
                 // extract and insert the parameter name (left section of the parameter)
-                stringBuilder.append("\"").append(parameterName).append("\": ");
+                stringBuilder.append("\"").append(entryParameterName).append("\": ");
 
                 // construct the correct object from the nested schema type
                 String type = classSchema.getType();
@@ -337,29 +355,29 @@ public class OpenAPIExtractor {
 
                         // if type of the nested schema is an array, extract the JSON object recursively and encapsulate it in squared brackets
                         case "array":
-                            stringBuilder.append("[").append(convertRawClassToJSON(rawClasses, getNestedClassNameFromSchema(classSchema))).append("]");
+                            stringBuilder.append("[").append(convertRawClassToJSON(rawClasses, getNestedClassNameFromSchema(classSchema), entryParameterName)).append("]");
                             break;
 
                         // if type of the nested schema is a string, set the parameter name as injectable parameter included in " characters
                         case "string":
-                            stringBuilder.append("\"").append("${").append(parameterName).append("}\"");
+                            stringBuilder.append("\"").append("${").append(entryParameterName).append("}\"");
                             break;
 
                         // if type of the nested schema is a primitive type (integer, boolean, etc), set the parameter name as injectable parameter but not included in " characters
                         default:
-                            stringBuilder.append("${").append(parameterName).append("}");
+                            stringBuilder.append("${").append(entryParameterName).append("}");
                             break;
                     }
                 }
 
                 // if the nested schema is a complex type, extract the JSON object recursively
                 else if (classSchema.getItems() != null) {
-                    stringBuilder.append(convertRawClassToJSON(rawClasses, getNestedClassNameFromSchema(classSchema)));
+                    stringBuilder.append(convertRawClassToJSON(rawClasses, getNestedClassNameFromSchema(classSchema), entryParameterName));
                 }
 
                 // if the nested schema is a complex type referenced directly to object, extract the JSON object recursively
                 else if (classSchema.get$ref() != null) {
-                    stringBuilder.append(convertRawClassToJSON(rawClasses, getClassNameFromReference(classSchema.get$ref())));
+                    stringBuilder.append(convertRawClassToJSON(rawClasses, getClassNameFromReference(classSchema.get$ref()), entryParameterName));
                 }
 
                 // add comma if not last parameter
@@ -370,6 +388,15 @@ public class OpenAPIExtractor {
 
             // JSON ending charachter
             stringBuilder.append("}");
+        }
+
+        // this one is included when there is an array of primitive objects
+        else {
+            if ("string".equals(className)) {
+                stringBuilder.append("\"${").append(parameterName).append("}\"");
+            } else {
+                stringBuilder.append("${").append(parameterName).append("}");
+            }
         }
         return stringBuilder.toString();
     }

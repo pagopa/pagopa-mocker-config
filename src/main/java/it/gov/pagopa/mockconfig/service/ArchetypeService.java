@@ -9,7 +9,6 @@ import it.gov.pagopa.mockconfig.mapper.ConvertMockResourceFromArchetypeToMockRes
 import it.gov.pagopa.mockconfig.model.archetype.*;
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
-import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
 import it.gov.pagopa.mockconfig.repository.ArchetypeRepository;
 import it.gov.pagopa.mockconfig.repository.MockResourceRepository;
 import it.gov.pagopa.mockconfig.util.OpenAPIExtractor;
@@ -37,6 +36,8 @@ public class ArchetypeService {
 
     @Autowired private MockTagService mockTagService;
 
+    @Autowired private ArchetypeSchemaService archetypeSchemaService;
+
     @Autowired private MockResourceRepository mockResourceRepository;
 
     @Autowired private ArchetypeRepository archetypeRepository;
@@ -52,6 +53,9 @@ public class ArchetypeService {
             // Generate archetype from the extracted OpenAPI content
             List<ArchetypeEntity> archetypeEntities = OpenAPIExtractor.extractArchetype(parsedOpenAPI.getOpenAPI(), subsystem);
             archetypeEntities.forEach(entity -> entity.setTags(mockTagService.validateResourceTags(entity.getTags())));
+            archetypeEntities.stream()
+                    .flatMap(archetype -> archetype.getResponses().stream())
+                    .forEach(archetypeResponse -> archetypeResponse.setSchema(archetypeSchemaService.validateResponseSchema(archetypeResponse.getSchema())));
 
             // Filter only the archetypes that are not already present in DB
             List<ArchetypeEntity> newArchetypeEntites = archetypeEntities.stream()
@@ -129,6 +133,28 @@ public class ArchetypeService {
         return response;
     }
 
+    public Archetype updateArchetype(String archetypeId, Archetype archetype) {
+        Archetype response;
+        try {
+
+            // Search if the archetype already exists
+            ArchetypeEntity archetypeEntity = archetypeRepository.findById(archetypeId).orElseThrow(() -> new AppException(AppError.ARCHETYPE_NOT_FOUND, archetypeId));
+
+            // check request semantic validity
+            RequestSemanticValidator.validate(archetype, archetypeEntity);
+
+            // delete the old archetype, the new one will replace this archetype
+            archetypeRepository.delete(archetypeEntity);
+
+            // Persisting the archetype
+            response = persistArchetype(archetype);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to update an archetype. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
 
     public ArchetypeHandlingResult deleteByCriteria(String subsystem) {
         ArchetypeHandlingResult archetypeHandlingResult;
@@ -193,5 +219,4 @@ public class ArchetypeService {
         archetypeEntity = archetypeRepository.save(archetypeEntity);
         return modelMapper.map(archetypeEntity, Archetype.class);
     }
-
 }

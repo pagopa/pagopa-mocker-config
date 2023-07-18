@@ -17,8 +17,7 @@ import java.util.List;
 @Transactional
 public class MockTagService {
 
-    @Autowired
-    private ResourceTagRepository resourceTagRepository;
+    @Autowired private ResourceTagRepository resourceTagRepository;
 
     @Autowired private RuleTagRepository ruleTagRepository;
 

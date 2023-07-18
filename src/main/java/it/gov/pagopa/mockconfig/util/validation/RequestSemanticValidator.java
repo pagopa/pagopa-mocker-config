@@ -54,6 +54,16 @@ public class RequestSemanticValidator {
     }
 
     public static void validate(Archetype archetype) {
+        validate(archetype);
+    }
+
+    public static void validate(Archetype archetype, ArchetypeEntity archetypeEntity) {
+
+        if (archetypeEntity != null) {
+
+            // checking URL congruency
+            ArchetypeValidation.checkURLCongruency(archetype, archetypeEntity);
+        }
 
         // check if url parameters are all set
         ArchetypeValidation.checkURLParameters(archetype);
