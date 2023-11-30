@@ -33,11 +33,11 @@ public class MockRuleEntity implements Serializable {
     @Column(name = "response_id", insertable = false, updatable = false)
     private String responseId;
 
-    @ManyToMany(targetEntity = TagEntity.class)
+    @ManyToMany(targetEntity = RuleTagEntity.class)
     @JoinTable(name = "mock_rule_tag",
             joinColumns = {@JoinColumn(name = "mock_rule_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
-    private List<TagEntity> tags;
+    private List<RuleTagEntity> tags;
 
     @OneToMany(targetEntity = MockConditionEntity.class, fetch = FetchType.EAGER, mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MockConditionEntity> conditions;

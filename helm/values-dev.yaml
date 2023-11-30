@@ -4,18 +4,18 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mock-config-be
-    tag: "1.0.1"
+    tag: "1.0.1-7-enhancements"
     pullPolicy: Always
   livenessProbe:
     httpGet:
-      path: /info
+      path: /actuator/health/liveness
       port: 8080
     initialDelaySeconds: 90
     failureThreshold: 6
     periodSeconds: 10
   readinessProbe:
     httpGet:
-      path: /info
+      path: /actuator/health/readiness
       port: 8080
     initialDelaySeconds: 90
     failureThreshold: 6
@@ -66,13 +66,17 @@ microservice-chart:
     ENV: 'aks-dev'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
+    CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
     SPRING_DATASOURCE_URL: 'jdbc:postgresql://pagopa-d-mocker-psql.postgres.database.azure.com/mocker'
     SPRING_DATASOURCE_DRIVER: 'org.postgresql.Driver'
     SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.PostgreSQLDialect'
     DATABASE_SCHEMA: 'mocker'
+    REDIS_HOST: "pagopa-d-redis.redis.cache.windows.net"
+    REDIS_PORT: "6380"
   envSecret:
     SPRING_DATASOURCE_USERNAME: 'db-mocker-user-name'
     SPRING_DATASOURCE_PASSWORD: 'db-mocker-user-pwd'
+    REDIS_PASSWORD: 'redis-password'
   keyvault:
     name: "pagopa-d-mock-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
@@ -90,4 +94,5 @@ microservice-chart:
   canaryDelivery:
     deployment:
       image:
-        tag: 1.0.1
+        tag: 1.0.1-6-enhancements
+    create: false

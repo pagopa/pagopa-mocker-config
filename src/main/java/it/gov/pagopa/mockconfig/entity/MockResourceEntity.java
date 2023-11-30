@@ -20,14 +20,14 @@ public class MockResourceEntity implements Serializable {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "resource_id")
-    private String resourceId;
-
     @Column(name = "subsystem_url")
     private String subsystemUrl;
 
     @Column(name = "resource_url")
     private String resourceUrl;
+
+    @Column(name = "action")
+    private String action;
 
     @Column(name = "http_method")
     @Enumerated(EnumType.STRING)
@@ -39,12 +39,19 @@ public class MockResourceEntity implements Serializable {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "archetype_id", insertable = false, updatable = false)
+    private String archetypeId;
+
     @OneToMany(targetEntity = MockRuleEntity.class, fetch = FetchType.EAGER, mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MockRuleEntity> rules;
 
-    @ManyToMany(targetEntity = TagEntity.class)
+    @ManyToMany(targetEntity = ResourceTagEntity.class)
     @JoinTable(name = "mock_resource_tag",
             joinColumns = {@JoinColumn(name = "mock_resource_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
-    private List<TagEntity> tags;
+    private List<ResourceTagEntity> tags;
+
+    @OneToOne(targetEntity = ArchetypeEntity.class, fetch = FetchType.EAGER)
+    @JoinColumn(name = "archetype_id")
+    private ArchetypeEntity archetype;
 }

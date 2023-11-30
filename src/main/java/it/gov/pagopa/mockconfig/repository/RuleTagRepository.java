@@ -1,13 +1,13 @@
 package it.gov.pagopa.mockconfig.repository;
 
-import it.gov.pagopa.mockconfig.entity.TagEntity;
+import it.gov.pagopa.mockconfig.entity.RuleTagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface TagRepository extends JpaRepository<TagEntity, String> {
+public interface RuleTagRepository extends JpaRepository<RuleTagEntity, String> {
 
-    Optional<TagEntity> findByValue(String value);
+    Optional<RuleTagEntity> findByValue(String value);
 }

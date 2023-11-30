@@ -13,5 +13,5 @@ public interface MockResourceRepository extends JpaRepository<MockResourceEntity
 
     Page<MockResourceEntity> findAll(Pageable pageable);
 
-    Optional<MockResourceEntity> findByResourceId(String resourceId);
+    Optional<MockResourceEntity> findById(String id);
 }
