@@ -77,6 +77,7 @@ microservice-chart:
     SPRING_DATASOURCE_USERNAME: 'db-mocker-user-name'
     SPRING_DATASOURCE_PASSWORD: 'db-mocker-user-pwd'
     REDIS_PASSWORD: 'redis-password'
+    OTEL_AUTH_BEARER: "otel-auth-bearer"
   keyvault:
     name: "pagopa-d-mock-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
