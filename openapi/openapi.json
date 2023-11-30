@@ -4,7 +4,7 @@
     "title": "mockconfig",
     "description": "A service that permits to configure the mocked responses used by Mocker service",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "1.0.1-7-enhancements"
+    "version": "1.0.2"
   },
   "servers": [
     {

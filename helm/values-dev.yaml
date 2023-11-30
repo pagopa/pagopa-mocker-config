@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mock-config-be
-    tag: "1.0.1-7-enhancements"
+    tag: "1.0.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
