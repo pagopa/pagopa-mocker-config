@@ -17,10 +17,11 @@ CREATE TABLE mocker.archetype (
 	id varchar NOT NULL,
 	"name" varchar NOT NULL,
 	subsystem_url varchar NOT NULL,
-	resource_url varchar NOT NULL,
+	resource_url varchar NULL,
+	"action" varchar NULL,
 	http_method varchar NOT NULL,
 	CONSTRAINT archetype_pk PRIMARY KEY (id),
-	CONSTRAINT archetype_u UNIQUE (subsystem_url, resource_url, http_method)
+	CONSTRAINT archetype_u UNIQUE (subsystem_url, resource_url, http_method, "action")
 );
 
 CREATE TABLE mocker.archetype_parameter (
@@ -67,14 +68,16 @@ CREATE TABLE mocker.archetype_response_header (
 );
 
 CREATE TABLE mocker.mock_resource (
-	id int8 NOT NULL,
+	id varchar NOT NULL,
 	subsystem_url varchar NOT NULL,
-	resource_url varchar NOT NULL,
+	resource_url varchar NULL,
+	"action" varchar NULL,
 	http_method varchar NOT NULL,
 	"name" varchar NOT NULL,
 	is_active boolean NOT NULL,
 	archetype_id varchar,
 	CONSTRAINT mock_resource_pk PRIMARY KEY (id),
+	CONSTRAINT mock_resource_u UNIQUE (subsystem_url, resource_url, http_method, "action"),
     CONSTRAINT mock_resource_archetype_fk FOREIGN KEY (archetype_id) REFERENCES mocker.archetype(id) ON DELETE SET NULL ON UPDATE SET NULL
 );
 
@@ -90,7 +93,7 @@ CREATE TABLE mocker.mock_rule (
 	"name" varchar NOT NULL,
 	"order" int8 NOT NULL,
 	is_active boolean NOT NULL,
-	resource_id int8 NOT NULL,
+	resource_id varchar NOT NULL,
 	response_id varchar NOT NULL,
 	CONSTRAINT mock_rule_pk PRIMARY KEY (id),
 	CONSTRAINT mock_rule_mock_resource_fk FOREIGN KEY (resource_id) REFERENCES mocker.mock_resource(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -126,7 +129,7 @@ CREATE TABLE mocker.injectable_parameter (
 );
 
 CREATE TABLE mocker.mock_resource_tag (
-	mock_resource_id int8 NOT NULL,
+	mock_resource_id varchar NOT NULL,
 	tag_id varchar NOT NULL,
 	CONSTRAINT mock_resource_tag_pk PRIMARY KEY (mock_resource_id,tag_id),
 	CONSTRAINT mock_resource_tag_mock_resource_fk FOREIGN KEY (mock_resource_id) REFERENCES mocker.mock_resource(id) ON DELETE CASCADE ON UPDATE CASCADE,

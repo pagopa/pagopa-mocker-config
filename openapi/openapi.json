@@ -1274,8 +1274,7 @@
             "description": "The identifier related to the mock resource",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -1390,8 +1389,7 @@
             "description": "The identifier related to the mock resource",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -1516,8 +1514,7 @@
             "description": "The identifier related to the mock resource",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -1716,10 +1713,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "The unique identifier of the mock resource.",
-            "format": "int64",
-            "example": 3263615463
+            "example": "fb5363bcf68f687c9caeddbc221769f6"
           },
           "name": {
             "type": "string",
@@ -1735,6 +1731,11 @@
             "type": "string",
             "description": "The specific URL on which the mock resource will be defined for the subsystem.",
             "example": "organizations/77777777777"
+          },
+          "soap_action": {
+            "type": "string",
+            "description": "The SOAP action related to the mock resource.",
+            "example": "paVerifyPaymentNotice"
           },
           "http_method": {
             "type": "string",

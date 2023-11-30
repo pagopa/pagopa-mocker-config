@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -191,7 +190,7 @@ public class ArchetypeService {
             log.info(String.format("Generating mock resource with resource URL [%s] from archetype with id [%s]", resourceUrl, archetypeId));
 
             // Search if the resource already exists
-            Long id = Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl);
+            String id = Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, archetypeEntity.getAction());
             mockResourceRepository.findById(id).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id); });
 
             // Map entity from input model, setting id and tags and completing the entities' tree

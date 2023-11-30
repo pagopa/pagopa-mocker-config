@@ -21,10 +21,11 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
         MockResource mockResource = mappingContext.getSource();
 
         MockResourceEntity mockResourceEntity = MockResourceEntity.builder()
-                .id(Utility.generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL()))
+                .id(Utility.generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL(), mockResource.getSoapAction()))
                 .name(mockResource.getName())
                 .subsystemUrl(mockResource.getSubsystem())
                 .resourceUrl(mockResource.getResourceURL())
+                .action(mockResource.getSoapAction())
                 .httpMethod(mockResource.getHttpMethod())
                 .isActive(mockResource.getIsActive())
                 .tags(buildResourceTagEntities(mockResource.getTags()))

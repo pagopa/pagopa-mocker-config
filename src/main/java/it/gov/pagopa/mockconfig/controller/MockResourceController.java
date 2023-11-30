@@ -80,7 +80,7 @@ public class MockResourceController {
     @GetMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<MockResource> getMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") Long resourceId) {
+            @NotBlank @PathVariable("resourceId") String resourceId) {
         return ResponseEntity.ok(mockResourceService.getMockResource(resourceId));
     }
 
@@ -125,7 +125,7 @@ public class MockResourceController {
     @PutMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<MockResource> updateMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") Long resourceId,
+            @NotBlank @PathVariable("resourceId") String resourceId,
             @RequestBody @Valid @NotNull MockResource mockResource) {
         return ResponseEntity.ok(mockResourceService.updateMockResource(resourceId, mockResource));
     }
@@ -149,7 +149,7 @@ public class MockResourceController {
     @DeleteMapping(value = "/{resourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> deleteMockResource(
             @Parameter(description = "The identifier related to the mock resource", required = true)
-            @NotBlank @PathVariable("resourceId") Long resourceId) {
+            @NotBlank @PathVariable("resourceId") String resourceId) {
         mockResourceService.deleteMockResource(resourceId);
         return ResponseEntity.ok().build();
     }

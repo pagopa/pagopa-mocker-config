@@ -65,6 +65,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                 .name(source.getName())
                 .subsystem(source.getSubsystemUrl())
                 .resourceURL(source.getResourceUrl())
+                .soapAction(source.getAction())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
                 .tags(Optional.ofNullable(source.getTags()).orElse(List.of()).stream().map(ResourceTagEntity::getValue).collect(Collectors.toList()))

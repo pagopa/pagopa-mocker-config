@@ -31,8 +31,8 @@ import java.util.Objects;
 public class MockResource implements Serializable {
 
     @JsonProperty("id")
-    @Schema(description = "The unique identifier of the mock resource.", example = "3263615463")
-    private Long id;
+    @Schema(description = "The unique identifier of the mock resource.", example = "fb5363bcf68f687c9caeddbc221769f6")
+    private String id;
 
     @JsonProperty("name")
     @Schema(description = "The name or description related to the mock resources, for human readability.", example = "Get enrolled organization with ID 77777777777")
@@ -45,9 +45,12 @@ public class MockResource implements Serializable {
     private String subsystem;
 
     @JsonProperty("resource_url")
-    @Schema(description = "The specific URL on which the mock resource will be defined for the subsystem.", example = "organizations/77777777777")
-    @NotBlank(message = "The URL related to the mock resource cannot be null or blank.")
+    @Schema(description = "The specific URL on which the mock resource will be defined for the subsystem. If no specific URL is needed, use blank string.", example = "organizations/77777777777")
     private String resourceURL;
+
+    @JsonProperty("soap_action")
+    @Schema(description = "The SOAP action related to the mock resource.", example = "paVerifyPaymentNotice")
+    private String soapAction;
 
     @JsonProperty("http_method")
     @Schema(description = "The HTTP method related to the mock resource.", example = "GET")

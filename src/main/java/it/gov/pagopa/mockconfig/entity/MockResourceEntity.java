@@ -18,13 +18,16 @@ public class MockResourceEntity implements Serializable {
 
     @Id
     @Column(name = "id")
-    private Long id;
+    private String id;
 
     @Column(name = "subsystem_url")
     private String subsystemUrl;
 
     @Column(name = "resource_url")
     private String resourceUrl;
+
+    @Column(name = "action")
+    private String action;
 
     @Column(name = "http_method")
     @Enumerated(EnumType.STRING)

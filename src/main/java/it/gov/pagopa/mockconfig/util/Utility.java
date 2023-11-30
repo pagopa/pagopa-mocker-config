@@ -3,14 +3,18 @@ package it.gov.pagopa.mockconfig.util;
 import it.gov.pagopa.mockconfig.model.PageInfo;
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Utility {
 
   private Utility() {}
@@ -28,21 +32,53 @@ public class Utility {
     return UUID.randomUUID().toString();
   }
 
-  public static long generateResourceId(MockResource mockResource) {
-    return generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL());
+  public static String generateResourceId(MockResource mockResource) {
+    return generateResourceId(mockResource.getHttpMethod(), mockResource.getSubsystem(), mockResource.getResourceURL(), mockResource.getSoapAction());
   }
 
-  public static long generateResourceId(HttpMethod httpMethod, String subsystem, String resourceURL) {
-    String refactoredResourceId = String.format(Constants.RESOURCE_ID_TEMPLATE, httpMethod, subsystem, resourceURL)
-            .toLowerCase()
-            .replaceAll("[\\\\/]+", "");
-    long hashValue = 0;
-    long pPow = 1;
-    for (char c : refactoredResourceId.toCharArray()) {
-      hashValue = (hashValue + (c - 'a' + 1) * pPow) % Constants.M_HASHING_VALUE;
-      pPow = (pPow * Constants.P_HASHING_VALUE) % Constants.M_HASHING_VALUE;
+  public static String generateResourceId(HttpMethod httpMethod, String subsystem, String resourceURL, String soapAction) {
+    StringBuilder urlBuilder = new StringBuilder();
+    urlBuilder.append("/").append(subsystem);
+    if (!subsystem.endsWith("/") && (resourceURL == null || !resourceURL.startsWith("/"))) {
+      urlBuilder.append("/");
     }
-    return hashValue & 0xffffffffL;
+    if (resourceURL != null) {
+      urlBuilder.append(resourceURL);
+      if (!resourceURL.endsWith("/")) {
+        urlBuilder.append("/");
+      }
+    }
+    return generateHash(urlBuilder.toString(), Optional.ofNullable(soapAction).orElse("").toLowerCase(), httpMethod.name().toLowerCase());
+  }
+
+  public static String generateHash(String... content) {
+    String hashedContent = "";
+    try {
+      StringBuilder builder = new StringBuilder();
+      Iterator<String> it = Arrays.stream(content).iterator();
+      while (it.hasNext()) {
+        String element = it.next();
+        builder.append(element);
+        if (it.hasNext() && !Constants.EMPTY_STRING.equals(element)) {
+          builder.append(Constants.WHITESPACE);
+        }
+      }
+      byte[] requestIdBytes = builder.toString().getBytes(StandardCharsets.UTF_8);
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] digestByteArray = md.digest(requestIdBytes);
+
+      StringBuilder hashStringBuilder = new StringBuilder();
+      for (byte b : digestByteArray) {
+        if ((0xff & b) < 0x10) {
+          hashStringBuilder.append('0');
+        }
+        hashStringBuilder.append(Integer.toHexString(0xff & b));
+      }
+      hashedContent = hashStringBuilder.toString();
+    } catch (NoSuchAlgorithmException e) {
+      log.error("Error while generating the hash value from objects. No valid algorithm found as 'MD5'.", e);
+    }
+    return hashedContent;
   }
 
   public static List<String> extractInjectableParameters(String body) {

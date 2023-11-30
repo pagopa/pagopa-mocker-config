@@ -3,8 +3,6 @@ package it.gov.pagopa.mockconfig.mapper;
 import it.gov.pagopa.mockconfig.entity.*;
 import it.gov.pagopa.mockconfig.entity.embeddable.InjectableParameterKey;
 import it.gov.pagopa.mockconfig.entity.embeddable.ResponseHeaderKey;
-import it.gov.pagopa.mockconfig.exception.AppError;
-import it.gov.pagopa.mockconfig.exception.AppException;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockResponseFromArchetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockRuleFromArchetype;
@@ -13,7 +11,6 @@ import it.gov.pagopa.mockconfig.model.mockresource.MockCondition;
 import it.gov.pagopa.mockconfig.util.Utility;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ConvertMockResourceFromArchetypeToMockResource {
@@ -24,10 +21,11 @@ public class ConvertMockResourceFromArchetypeToMockResource {
 
         // generating the mock resource
         MockResourceEntity mockResourceEntity = MockResourceEntity.builder()
-                .id(Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl))
+                .id(Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, archetypeEntity.getAction()))
                 .name(archetypeEntity.getName())
                 .subsystemUrl(archetypeEntity.getSubsystemUrl())
                 .resourceUrl(resourceUrl)
+                .action(archetypeEntity.getAction())
                 .httpMethod(archetypeEntity.getHttpMethod())
                 .isActive(mockResourceFromArchetype.isActive())
                 .rules(new LinkedList<>())

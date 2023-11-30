@@ -32,6 +32,9 @@ public class ArchetypeEntity implements Serializable {
     @Column(name = "resource_url")
     private String resourceUrl;
 
+    @Column(name = "action")
+    private String action;
+
     @Column(name = "http_method")
     @Enumerated(EnumType.STRING)
     private HttpMethod httpMethod;

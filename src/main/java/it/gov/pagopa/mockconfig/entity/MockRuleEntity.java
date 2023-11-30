@@ -28,7 +28,7 @@ public class MockRuleEntity implements Serializable {
     private boolean isActive;
 
     @Column(name = "resource_id", insertable = false, updatable = false)
-    private Long resourceId;
+    private String resourceId;
 
     @Column(name = "response_id", insertable = false, updatable = false)
     private String responseId;

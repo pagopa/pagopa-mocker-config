@@ -22,8 +22,7 @@ public class Constants {
 
   public static final Set<ContentType> CONTENT_TYPES_FOR_BODY = Set.of(ContentType.JSON, ContentType.XML);
 
-  public static final long P_HASHING_VALUE = 53;
+  public static final String EMPTY_STRING = "";
 
-  // Hashing collision probability: 1/m -> 1/1000000009 = 0.000000001%
-  public static final long M_HASHING_VALUE = 1000000009;
+  public static final String WHITESPACE = " ";
 }

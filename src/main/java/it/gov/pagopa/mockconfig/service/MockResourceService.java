@@ -48,7 +48,7 @@ public class MockResourceService {
                 .build();
     }
 
-    public MockResource getMockResource(Long id) {
+    public MockResource getMockResource(String id) {
         MockResourceEntity mockResourceEntity;
         try {
             mockResourceEntity = mockResourceRepository.findById(id)
@@ -68,7 +68,7 @@ public class MockResourceService {
             RequestSemanticValidator.validate(mockResource);
 
             // Search if the resource already exists
-            Long id = Utility.generateResourceId(mockResource);
+            String id = Utility.generateResourceId(mockResource);
             mockResourceRepository.findById(id).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id); });
 
             // Persisting the mock resource
@@ -81,7 +81,7 @@ public class MockResourceService {
         return response;
     }
 
-    public MockResource updateMockResource(Long id, MockResource mockResource) {
+    public MockResource updateMockResource(String id, MockResource mockResource) {
         MockResource response;
         try {
 
@@ -89,7 +89,7 @@ public class MockResourceService {
             RequestSemanticValidator.validate(mockResource);
 
             // Check if passed resource identifier is equals to the one generable by body content
-            Long generatedId = Utility.generateResourceId(mockResource);
+            String generatedId = Utility.generateResourceId(mockResource);
             if (!generatedId.equals(id)) {
                 throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_ID, id, generatedId);
             }
@@ -113,7 +113,7 @@ public class MockResourceService {
         return response;
     }
 
-    public void deleteMockResource(Long id) {
+    public void deleteMockResource(String id) {
         try {
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id)
                     .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
