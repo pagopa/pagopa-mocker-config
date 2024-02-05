@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mock-config-be
-    tag: "1.1.3-1-NOD-700-mocker-fix-modifica-risorsa-di-mock"
+    tag: "1.1.3-2-NOD-700-mocker-fix-modifica-risorsa-di-mock"
     pullPolicy: Always
   livenessProbe:
     httpGet:
