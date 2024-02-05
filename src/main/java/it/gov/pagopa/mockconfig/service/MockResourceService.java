@@ -96,7 +96,7 @@ public class MockResourceService {
 
             // Search if the resource exists
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
-            if (!mockResourceEntity.getResourceUrl().equals(mockResource.getResourceURL()) || !mockResourceEntity.getSubsystemUrl().equals(mockResource.getSubsystem())) {
+            if (!isResourceURLNotChanged(mockResource, mockResourceEntity)) {
                 throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_URL, id, mockResourceEntity.getId());
             }
 
@@ -131,8 +131,16 @@ public class MockResourceService {
         mockResourceEntity.getRules().forEach(rule -> rule.setTags(mockTagService.validateRuleTags(rule.getTags())));
 
         // Save the converted resource
-        mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
+        mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
         return modelMapper.map(mockResourceEntity, MockResource.class);
+    }
+
+    private boolean isResourceURLNotChanged(MockResource mockResource, MockResourceEntity mockResourceEntity) {
+        String mockResourceEntityResourceUrl =  Utility.deNull(mockResourceEntity.getResourceUrl());
+        String mockResourceResourceUrl =  Utility.deNull(mockResource.getResourceURL());
+        String mockResourceEntitySubsystemUrl =  Utility.deNull(mockResourceEntity.getSubsystemUrl());
+        String mockResourceSubsystemUrl =  Utility.deNull(mockResource.getSubsystem());
+        return mockResourceEntityResourceUrl.equals(mockResourceResourceUrl) && mockResourceEntitySubsystemUrl.equals(mockResourceSubsystemUrl);
     }
 
 }

@@ -28,6 +28,10 @@ public class Utility {
         .build();
   }
 
+  public static String deNull(Object value) {
+    return Optional.ofNullable(value).orElse("").toString();
+  }
+
   public static String generateUUID() {
     return UUID.randomUUID().toString();
   }
