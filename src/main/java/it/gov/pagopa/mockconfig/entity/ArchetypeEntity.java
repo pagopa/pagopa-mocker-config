@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 
 @Data
@@ -53,4 +54,22 @@ public class ArchetypeEntity implements Serializable {
 
     @OneToMany(targetEntity = MockResourceEntity.class, fetch = FetchType.LAZY, mappedBy = "archetype")
     private List<MockResourceEntity> mockResources;
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ArchetypeEntity other = (ArchetypeEntity) obj;
+        return Objects.equals(id, other.getId());
+    }
 }

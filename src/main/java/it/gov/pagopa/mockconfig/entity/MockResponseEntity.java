@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -32,4 +33,22 @@ public class MockResponseEntity implements Serializable {
 
     @OneToOne(targetEntity = MockRuleEntity.class, fetch = FetchType.LAZY, optional = false, mappedBy = "response", cascade = CascadeType.ALL)
     private MockRuleEntity rule;
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MockResponseEntity other = (MockResponseEntity) obj;
+        return Objects.equals(id, other.getId());
+    }
 }

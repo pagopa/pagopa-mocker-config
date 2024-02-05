@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -50,4 +51,22 @@ public class MockConditionEntity implements Serializable {
     @ManyToOne(targetEntity = MockRuleEntity.class, fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "rule_id")
     private MockRuleEntity rule;
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MockConditionEntity other = (MockConditionEntity) obj;
+        return Objects.equals(id, other.getId());
+    }
 }
