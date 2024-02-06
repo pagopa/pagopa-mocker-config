@@ -48,7 +48,7 @@ public class MockResponse implements Serializable {
     @Valid
     private List<ResponseHeader> headers;
 
-    @JsonProperty("parameters")
+    @JsonProperty("injected_parameters")
     @Schema(description = "The list of parameters that will be injected from request body to response body by Mocker.")
     @NotNull(message = "The parameter to be injected in the mocked response for the mock rule cannot be null.")
     @Valid
