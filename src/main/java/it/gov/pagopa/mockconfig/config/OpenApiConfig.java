@@ -37,7 +37,7 @@ public class OpenApiConfig {
                                                 new ServerVariable()._enum(List.of("api.dev.platform.pagopa.it","api.uat.platform.pagopa.it"))
                                                         ._default("api.dev.platform.pagopa.it"))
                                         .addServerVariable("basePath", new ServerVariable()._enum(List.of("/mock-config/auth/api/v1", "/mock-config/api/v1"))
-                                                ._default("/mock-config/auth/api/v1"))
+                                                ._default("/mock-config/api/v1"))
                                 )))
                 .components(
                         new Components()

@@ -55,3 +55,8 @@ variable "hostname" {
   default     = null
   description = "Hostname for the API"
 }
+
+variable "cname_record_name" {
+  type    = string
+  default = "mocker"
+}
