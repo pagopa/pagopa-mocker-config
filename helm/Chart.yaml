@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopa-mock-config-be
 description: A service that permits to configure the mocked responses used by Mocker service
 type: application
-version: 1.19.0
-appVersion: 1.1.3-6-NOD-700-mocker-fix-modifica-risorsa-di-mock
+version: 1.20.0
+appVersion: 1.1.3-7-NOD-700-mocker-fix-modifica-risorsa-di-mock
 dependencies:
   - name: microservice-chart
     version: 1.21.0
