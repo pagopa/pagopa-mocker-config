@@ -1,6 +1,8 @@
 package it.gov.pagopa.mockconfig.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -40,7 +42,8 @@ public class MockRuleEntity implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
     private List<RuleTagEntity> tags;
 
-    @OneToMany(targetEntity = MockConditionEntity.class, fetch = FetchType.EAGER, mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(targetEntity = MockConditionEntity.class, mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SELECT)
     private List<MockConditionEntity> conditions;
 
     @OneToOne(targetEntity = MockResponseEntity.class, fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)

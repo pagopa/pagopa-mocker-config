@@ -2,6 +2,8 @@ package it.gov.pagopa.mockconfig.entity;
 
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -43,7 +45,8 @@ public class MockResourceEntity implements Serializable {
     @Column(name = "archetype_id", insertable = false, updatable = false)
     private String archetypeId;
 
-    @OneToMany(targetEntity = MockRuleEntity.class, fetch = FetchType.EAGER, mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(targetEntity = MockRuleEntity.class, mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SELECT)
     private List<MockRuleEntity> rules;
 
     @ManyToMany(targetEntity = ResourceTagEntity.class)
