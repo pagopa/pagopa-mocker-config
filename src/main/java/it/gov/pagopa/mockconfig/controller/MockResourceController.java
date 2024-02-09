@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.gov.pagopa.mockconfig.model.ProblemJson;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResource;
+import it.gov.pagopa.mockconfig.model.mockresource.MockResourceGeneralInfo;
 import it.gov.pagopa.mockconfig.model.mockresource.MockResourceList;
+import it.gov.pagopa.mockconfig.model.mockresource.MockRule;
 import it.gov.pagopa.mockconfig.service.MockResourceService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +96,7 @@ public class MockResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
@@ -116,6 +119,7 @@ public class MockResourceController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
@@ -128,6 +132,31 @@ public class MockResourceController {
             @NotBlank @PathVariable("resourceId") String resourceId,
             @RequestBody @Valid @NotNull MockResource mockResource) {
         return ResponseEntity.ok(mockResourceService.updateMockResource(resourceId, mockResource));
+    }
+
+    @Operation(
+            summary = "Partially update an existing mock resource, changing only the general info",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Mock Resources"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @PutMapping(value = "/{resourceId}/general-info", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<MockResource> updateMockResourceGeneralInfo(
+            @Parameter(description = "The identifier related to the mock resource", required = true)
+            @NotBlank @PathVariable("resourceId") String resourceId,
+            @RequestBody @Valid @NotNull MockResourceGeneralInfo mockResourceGeneralInfo) {
+        return ResponseEntity.ok(mockResourceService.updateMockResourceGeneralInfo(resourceId, mockResourceGeneralInfo));
     }
 
     @Operation(
@@ -151,6 +180,6 @@ public class MockResourceController {
             @Parameter(description = "The identifier related to the mock resource", required = true)
             @NotBlank @PathVariable("resourceId") String resourceId) {
         mockResourceService.deleteMockResource(resourceId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

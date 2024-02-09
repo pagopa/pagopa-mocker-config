@@ -1,6 +1,7 @@
 package it.gov.pagopa.mockconfig.util.validation;
 
 import it.gov.pagopa.mockconfig.entity.ArchetypeEntity;
+import it.gov.pagopa.mockconfig.entity.MockRuleEntity;
 import it.gov.pagopa.mockconfig.model.archetype.Archetype;
 import it.gov.pagopa.mockconfig.model.archetype.ArchetypeResponse;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;

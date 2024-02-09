@@ -51,8 +51,7 @@ public class MockResourceService {
     public MockResource getMockResource(String id) {
         MockResourceEntity mockResourceEntity;
         try {
-            mockResourceEntity = mockResourceRepository.findById(id)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve the detail of a mock resource. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
@@ -113,10 +112,40 @@ public class MockResourceService {
         return response;
     }
 
+    public MockResource updateMockResourceGeneralInfo(String id, MockResourceGeneralInfo mockResourceGeneralInfo) {
+        MockResource response;
+        try {
+
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+
+            // generating tag entities
+            List<ResourceTagEntity> tagEntities = mockResourceGeneralInfo.getTags().stream()
+                    .map(tag -> ResourceTagEntity.builder()
+                            .id(Utility.generateUUID())
+                            .value(tag)
+                            .build())
+                    .collect(Collectors.toList());
+
+            // updating resource info
+            mockResourceEntity.setName(mockResourceGeneralInfo.getName());
+            mockResourceEntity.setIsActive(mockResourceGeneralInfo.getIsActive());
+            mockResourceEntity.setTags(mockTagService.validateResourceTags(tagEntities));
+
+            // Save the converted resource
+            mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
+            response = modelMapper.map(mockResourceEntity, MockResource.class);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to update a mock resource. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     public void deleteMockResource(String id) {
         try {
-            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
             mockResourceRepository.delete(mockResourceEntity);
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to delete a mock resource. ", e);
