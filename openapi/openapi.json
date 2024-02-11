@@ -1704,6 +1704,152 @@
           "type" : "string"
         }
       } ]
+    },
+    "/resources/{resourceId}/rules" : {
+      "post" : {
+        "tags" : [ "Mock Resources" ],
+        "summary" : "Create a new mock resource",
+        "operationId" : "createMockRule",
+        "parameters" : [ {
+          "name" : "resourceId",
+          "in" : "path",
+          "description" : "The identifier related to the mock resource",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MockRule"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MockResource"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "Too many requests",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Service unavailable",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ApiKey" : [ ]
+        }, {
+          "Authorization" : [ ]
+        } ]
+      },
+      "parameters" : [ {
+        "name" : "X-Request-Id",
+        "in" : "header",
+        "description" : "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+        "schema" : {
+          "type" : "string"
+        }
+      } ]
     }
   },
   "components" : {

@@ -17,6 +17,8 @@ import java.util.regex.PatternSyntaxException;
 
 public class MockResourceValidation {
 
+    private MockResourceValidation() {}
+
     public static void checkRuleOrderDuplication(Set<Integer> alreadAssignedOrderCardinality, Integer order) {
         if (alreadAssignedOrderCardinality.contains(order)) {
             throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_DUPLICATE_RULE_ORDER);

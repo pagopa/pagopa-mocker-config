@@ -80,6 +80,31 @@ public class MockResourceService {
         return response;
     }
 
+    public MockResource createMockRule(String resourceId, MockRule mockRule) {
+        MockResource response;
+        try {
+
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+
+            // Map mock rule to entity and then add to resource
+            MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockResourceEntity.getRules().add(mockRuleEntity);
+
+            // check request semantic validity
+            RequestSemanticValidator.validate(modelMapper.map(mockResourceEntity, MockResource.class));
+
+            // Persisting the mock resource
+            mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
+            response = modelMapper.map(mockResourceEntity, MockResource.class);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to create a mock rule. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     public MockResource updateMockResource(String id, MockResource mockResource) {
         MockResource response;
         try {
@@ -171,5 +196,4 @@ public class MockResourceService {
         String mockResourceSubsystemUrl =  Utility.deNull(mockResource.getSubsystem());
         return mockResourceEntityResourceUrl.equals(mockResourceResourceUrl) && mockResourceEntitySubsystemUrl.equals(mockResourceSubsystemUrl);
     }
-
 }

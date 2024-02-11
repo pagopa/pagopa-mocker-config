@@ -110,6 +110,31 @@ public class MockResourceController {
     }
 
     @Operation(
+            summary = "Create a new mock resource",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Mock Resources"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @PostMapping(value = "/{resourceId}/rules", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<MockResource> createMockRule(
+            @Parameter(description = "The identifier related to the mock resource", required = true)
+            @NotBlank @PathVariable("resourceId") String resourceId,
+            @RequestBody @Valid @NotNull MockRule mockRule) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(mockResourceService.createMockRule(resourceId, mockRule));
+    }
+
+    @Operation(
             summary = "Update an existing mock resource",
             security = {
                     @SecurityRequirement(name = "ApiKey"),
