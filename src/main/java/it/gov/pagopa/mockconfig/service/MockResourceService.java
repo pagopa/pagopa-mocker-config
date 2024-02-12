@@ -31,12 +31,12 @@ public class MockResourceService {
     @Autowired private ModelMapper modelMapper;
 
     public MockResourceList getMockResources(Pageable pageable) {
-        List<MockResource> mockResources;
+        List<MockResourceReduced> mockResources;
         Page<MockResourceEntity> mockResourcePaginatedEntities;
         try {
             mockResourcePaginatedEntities = mockResourceRepository.findAll(pageable);
             mockResources = mockResourcePaginatedEntities.stream()
-                    .map(mockResource -> modelMapper.map(mockResource, MockResource.class))
+                    .map(mockResource -> modelMapper.map(mockResource, MockResourceReduced.class))
                     .collect(Collectors.toList());
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve a list of mock resources. ", e);
@@ -89,14 +89,19 @@ public class MockResourceService {
 
             // Map mock rule to entity and then add to resource
             MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockRuleEntity.setResourceId(mockResourceEntity.getId());
+            mockRuleEntity.setResource(mockResourceEntity);
             mockResourceEntity.getRules().add(mockRuleEntity);
 
             // check request semantic validity
-            RequestSemanticValidator.validate(modelMapper.map(mockResourceEntity, MockResource.class));
+            MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
+            RequestSemanticValidator.validate(mockResource);
+
+            // delete the old resource, the new one will replace this resource
+            mockResourceRepository.delete(mockResourceEntity);
 
             // Persisting the mock resource
-            mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
-            response = modelMapper.map(mockResourceEntity, MockResource.class);
+            response = persistMockResource(mockResource);
 
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to create a mock rule. ", e);
@@ -132,6 +137,45 @@ public class MockResourceService {
 
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to update a mock resource. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    public MockResource updateMockRule(String resourceId, String ruleId, MockRule mockRule) {
+        MockResource response = null;
+        try {
+/*
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+            MockRuleEntity mockRuleEntity = mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
+
+            mockRuleEntity.setName(mockRule.getName());
+            mockRuleEntity.setOrder(mockRule.getOrder());
+            mockRuleEntity.setActive(mockRuleEntity.isActive());
+            // set tags
+
+
+
+
+            // Map mock rule to entity and then add to resource
+            MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockRuleEntity.setResourceId(mockResourceEntity.getId());
+            mockRuleEntity.setResource(mockResourceEntity);
+            mockResourceEntity.getRules().add(mockRuleEntity);
+
+            // check request semantic validity
+            MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
+            RequestSemanticValidator.validate(mockResource);
+
+            // delete the old resource, the new one will replace this resource
+            mockResourceRepository.delete(mockResourceEntity);
+
+            // Persisting the mock resource
+            response = persistMockResource(mockResource);
+*/
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to create a mock rule. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
         }
         return response;

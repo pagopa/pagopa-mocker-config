@@ -110,7 +110,7 @@ public class MockResourceController {
     }
 
     @Operation(
-            summary = "Create a new mock resource",
+            summary = "Create a new mock rule for certain mock resource",
             security = {
                     @SecurityRequirement(name = "ApiKey"),
                     @SecurityRequirement(name = "Authorization")

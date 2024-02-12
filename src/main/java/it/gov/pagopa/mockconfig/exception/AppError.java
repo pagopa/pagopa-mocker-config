@@ -25,6 +25,7 @@ public enum AppError {
   MOCK_RESOURCE_BAD_REQUEST_UNPARSEABLE_RESPONSE_BODY(HttpStatus.BAD_REQUEST, "Invalid format for response body", "The response body related to the mock rule [%] is not passed as a valid Base64 content."),
   MOCK_RESOURCE_CONFLICT(HttpStatus.CONFLICT, "Mock resource already exists", "Another mock resource exists with id [%s]."),
   MOCK_RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "Mock resource not found", "No valid mock resource found with id [%s]."),
+  MOCK_RULE_NOT_FOUND(HttpStatus.NOT_FOUND, "Mock rule not found", "No valid mock rule with id [%s] was found for mock resource found with id [%s]."),
   MOCK_RESOURCE_GENERATION_FROM_ARCHETYPE_INVALID_HTTPSTATUS(HttpStatus.BAD_REQUEST, "Invalid HTTP status", "No valid response defined in archetype for the HTTP status [%d]."),
   MOCK_RESOURCE_GENERATION_FROM_ARCHETYPE_MISSING_URL_PARAMETER(HttpStatus.BAD_REQUEST, "Missing URL parameter", "The request must provide all the path parameters defined by the archetype: %s"),
   OPENAPI_IMPORT_INVALID_FILE_CONTENT(HttpStatus.BAD_REQUEST, "Invalid OpenAPI file", "The passed OpenAPI file is invalid or malformed and cannot be analyzed.")

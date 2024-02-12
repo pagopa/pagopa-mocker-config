@@ -28,7 +28,7 @@ public class MockResourceList implements Serializable {
     @JsonProperty("resources")
     @NotNull
     @Schema(description = "The list of retrieved mock resources.")
-    private List<MockResource> mockResources;
+    private List<MockResourceReduced> mockResources;
 
     @JsonProperty("page_info")
     @Schema(description = "The information related to the result page.")
