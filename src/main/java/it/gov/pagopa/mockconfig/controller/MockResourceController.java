@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -131,7 +130,7 @@ public class MockResourceController {
             @Parameter(description = "The identifier related to the mock resource", required = true)
             @NotBlank @PathVariable("resourceId") String resourceId,
             @RequestBody @Valid @NotNull MockRule mockRule) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(mockResourceService.createMockRule(resourceId, mockRule));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mockResourceService.upsertMockRule(resourceId, mockRule));
     }
 
     @Operation(
@@ -182,6 +181,33 @@ public class MockResourceController {
             @NotBlank @PathVariable("resourceId") String resourceId,
             @RequestBody @Valid @NotNull MockResourceGeneralInfo mockResourceGeneralInfo) {
         return ResponseEntity.ok(mockResourceService.updateMockResourceGeneralInfo(resourceId, mockResourceGeneralInfo));
+    }
+
+    @Operation(
+            summary = "Update an existing mock rule for certain mock resource",
+            security = {
+                    @SecurityRequirement(name = "ApiKey"),
+                    @SecurityRequirement(name = "Authorization")
+            },
+            tags = {"Mock Resources"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MockResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,schema = @Schema(implementation = ProblemJson.class)))
+    })
+    @PutMapping(value = "/{resourceId}/rules/{ruleId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<MockResource> updateMockRule(
+            @Parameter(description = "The identifier related to the mock resource", required = true)
+            @NotBlank @PathVariable("resourceId") String resourceId,
+            @Parameter(description = "The identifier related to the mock rule", required = true)
+            @NotBlank @PathVariable("ruleId") String ruleId,
+            @RequestBody @Valid @NotNull MockRule mockRule) {
+        return ResponseEntity.ok(mockResourceService.updateMockRule(resourceId, ruleId, mockRule));
     }
 
     @Operation(

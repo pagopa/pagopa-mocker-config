@@ -52,7 +52,8 @@ public class Utility {
         urlBuilder.append("/");
       }
     }
-    return generateHash(urlBuilder.toString(), Optional.ofNullable(soapAction).orElse("").toLowerCase(), httpMethod.name().toLowerCase());
+    String completeUrl = urlBuilder.toString().replace("//", "/");
+    return generateHash(completeUrl, Optional.ofNullable(soapAction).orElse("").toLowerCase(), httpMethod.name().toLowerCase());
   }
 
   public static String generateHash(String... content) {

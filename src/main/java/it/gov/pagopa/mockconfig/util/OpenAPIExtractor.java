@@ -10,8 +10,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import it.gov.pagopa.mockconfig.entity.*;
-import it.gov.pagopa.mockconfig.entity.embeddable.ArchetypeParameterKey;
-import it.gov.pagopa.mockconfig.entity.embeddable.ArchetypeResponseHeaderKey;
 import it.gov.pagopa.mockconfig.model.enumeration.ArchetypeParameterType;
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -128,24 +126,14 @@ public class OpenAPIExtractor {
         return rawClasses;
     }
 
-    private static List<ResourceTagEntity> extractTagsFromOperation(Operation operation) {
-        List<ResourceTagEntity> resourceTagEntities = new LinkedList<>();
+    private static List<String> extractTagsFromOperation(Operation operation) {
+        List<String> resourceTagEntities = new LinkedList<>();
 
         // add tag created by operation identifier
-        resourceTagEntities.add(ResourceTagEntity.builder()
-                .id(Utility.generateUUID())
-                .value(operation.getOperationId())
-                .build()
-        );
+        resourceTagEntities.add(operation.getOperationId());
 
         // add tags created by operation tags
-        for (String tag : operation.getTags()) {
-            resourceTagEntities.add(ResourceTagEntity.builder()
-                    .id(Utility.generateUUID())
-                    .value(tag)
-                    .build()
-            );
-        }
+        resourceTagEntities.addAll(operation.getTags());
         return resourceTagEntities;
     }
 
@@ -158,13 +146,8 @@ public class OpenAPIExtractor {
 
                 // add a new parameter starting from operation's parameter
                 parameterEntities.add(ArchetypeParameterEntity.builder()
-                        .id(ArchetypeParameterKey.builder()
-                                .archetypeId(archetypeEntity.getId())
-                                .name(parameter.getName())
-                                .build()
-                        )
+                        .name(parameter.getName())
                         .type(ArchetypeParameterType.valueOf(parameter.getIn().toUpperCase()))
-                        .archetype(archetypeEntity)
                         .build()
                 );
             }
@@ -199,20 +182,13 @@ public class OpenAPIExtractor {
                     .id(Utility.generateUUID())
                     .status(Integer.parseInt(responseEntry.getKey()))
                     .headers(responseHeaderEntities)
-                    .archetypeId(archetypeEntity.getId())
-                    .archetype(archetypeEntity)
-                    .schema(archetypeSchema)
+                    .schemaId(archetypeSchema != null ? archetypeSchema.getId() : null)
                     .build();
 
             // extracting the headers
             responseHeaderEntities.addAll(extractHeadersFromOperation(response, archetypeResponseEntity));
             responseHeaderEntities.add(ArchetypeResponseHeaderEntity.builder()
-                    .id(ArchetypeResponseHeaderKey.builder()
-                            .archetypeResponseId(archetypeResponseEntity.getId())
-                            .header("Content-Type") // add content-type from extracted content
-                            .build()
-                    )
-                    .response(archetypeResponseEntity)
+                    .header("Content-Type") // add content-type from extracted content
                     .value(content.getLeft())
                     .build()
             );
@@ -233,13 +209,8 @@ public class OpenAPIExtractor {
 
                 // add a new header starting from operation's header
                 headerEntities.add(ArchetypeResponseHeaderEntity.builder()
-                        .id(ArchetypeResponseHeaderKey.builder()
-                                .archetypeResponseId(archetypeResponseEntity.getId())
-                                .header(headerEntry.getKey())
-                                .build()
-                        )
+                        .header(headerEntry.getKey())
                         .value("-")
-                        .response(archetypeResponseEntity)
                         .build()
                 );
             }
@@ -269,15 +240,13 @@ public class OpenAPIExtractor {
                         break;
 
                     // generate the JSON response body
-                    case "application/xml":
-                    case "text/xml":
+                    case "application/xml", "text/xml":
                         bodyContent = extractXMLFromReferencedClass(contentMediaTypeEntry.getValue(), rawClasses);
                         schemaName = getClassNameFromReference(schema != null ? Optional.ofNullable(schema.get$ref()).orElse(schema.getType()) : "");
                         break;
 
                     // generate raw data for plain text and binary data
-                    case "text/plain":
-                    case "application/octet-stream":
+                    case "text/plain", "application/octet-stream":
                         bodyContent = Base64.getEncoder().encodeToString("${content}".getBytes());
                         schemaName = "string";
                         break;

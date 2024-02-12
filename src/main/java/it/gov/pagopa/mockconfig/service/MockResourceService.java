@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class MockResourceService {
 
-    @Autowired private MockTagService mockTagService;
-
     @Autowired private MockResourceRepository mockResourceRepository;
 
     @Autowired private ModelMapper modelMapper;
@@ -80,7 +78,7 @@ public class MockResourceService {
         return response;
     }
 
-    public MockResource createMockRule(String resourceId, MockRule mockRule) {
+    public MockResource upsertMockRule(String resourceId, MockRule mockRule) {
         MockResource response;
         try {
 
@@ -89,16 +87,11 @@ public class MockResourceService {
 
             // Map mock rule to entity and then add to resource
             MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
-            mockRuleEntity.setResourceId(mockResourceEntity.getId());
-            mockRuleEntity.setResource(mockResourceEntity);
             mockResourceEntity.getRules().add(mockRuleEntity);
 
             // check request semantic validity
             MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
             RequestSemanticValidator.validate(mockResource);
-
-            // delete the old resource, the new one will replace this resource
-            mockResourceRepository.delete(mockResourceEntity);
 
             // Persisting the mock resource
             response = persistMockResource(mockResource);
@@ -145,35 +138,20 @@ public class MockResourceService {
     public MockResource updateMockRule(String resourceId, String ruleId, MockRule mockRule) {
         MockResource response = null;
         try {
-/*
             // Search if the resource exists
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
-            MockRuleEntity mockRuleEntity = mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
+            mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
 
-            mockRuleEntity.setName(mockRule.getName());
-            mockRuleEntity.setOrder(mockRule.getOrder());
-            mockRuleEntity.setActive(mockRuleEntity.isActive());
-            // set tags
-
-
-
-
-            // Map mock rule to entity and then add to resource
-            MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
-            mockRuleEntity.setResourceId(mockResourceEntity.getId());
-            mockRuleEntity.setResource(mockResourceEntity);
-            mockResourceEntity.getRules().add(mockRuleEntity);
+            MockRuleEntity mockRuleEntityToBeUpdated = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockResourceEntity.getRules().add(mockRuleEntityToBeUpdated);
 
             // check request semantic validity
             MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
             RequestSemanticValidator.validate(mockResource);
 
-            // delete the old resource, the new one will replace this resource
-            mockResourceRepository.delete(mockResourceEntity);
-
             // Persisting the mock resource
             response = persistMockResource(mockResource);
-*/
+
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to create a mock rule. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
@@ -188,21 +166,13 @@ public class MockResourceService {
             // Search if the resource exists
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
 
-            // generating tag entities
-            List<ResourceTagEntity> tagEntities = mockResourceGeneralInfo.getTags().stream()
-                    .map(tag -> ResourceTagEntity.builder()
-                            .id(Utility.generateUUID())
-                            .value(tag)
-                            .build())
-                    .collect(Collectors.toList());
-
             // updating resource info
             mockResourceEntity.setName(mockResourceGeneralInfo.getName());
             mockResourceEntity.setIsActive(mockResourceGeneralInfo.getIsActive());
-            mockResourceEntity.setTags(mockTagService.validateResourceTags(tagEntities));
+            mockResourceEntity.setTags(Set.copyOf(mockResourceGeneralInfo.getTags()));
 
             // Save the converted resource
-            mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
+            mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
             response = modelMapper.map(mockResourceEntity, MockResource.class);
 
         } catch (DataAccessException e) {
@@ -225,11 +195,11 @@ public class MockResourceService {
     private MockResource persistMockResource(MockResource mockResource) {
         // Map entity from input model, setting id and tags and completing the entities' tree
         MockResourceEntity mockResourceEntity = modelMapper.map(mockResource, MockResourceEntity.class);
-        mockResourceEntity.setTags(mockTagService.validateResourceTags(mockResourceEntity.getTags()));
-        mockResourceEntity.getRules().forEach(rule -> rule.setTags(mockTagService.validateRuleTags(rule.getTags())));
+        mockResourceEntity.setTags(Set.copyOf(mockResource.getTags()));
+        mockResourceEntity.getRules().forEach(rule -> rule.setTags(Set.copyOf(rule.getTags())));
 
         // Save the converted resource
-        mockResourceEntity = mockResourceRepository.saveAndFlush(mockResourceEntity);
+        mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
         return modelMapper.map(mockResourceEntity, MockResource.class);
     }
 
