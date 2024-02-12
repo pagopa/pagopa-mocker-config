@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class ArchetypeService {
 
-    @Autowired private MockTagService mockTagService;
-
     @Autowired private ArchetypeSchemaService archetypeSchemaService;
 
     @Autowired private MockResourceRepository mockResourceRepository;
@@ -51,10 +49,6 @@ public class ArchetypeService {
 
             // Generate archetype from the extracted OpenAPI content
             List<ArchetypeEntity> archetypeEntities = OpenAPIExtractor.extractArchetype(parsedOpenAPI.getOpenAPI(), subsystem);
-            archetypeEntities.forEach(entity -> entity.setTags(mockTagService.validateResourceTags(entity.getTags())));
-            archetypeEntities.stream()
-                    .flatMap(archetype -> archetype.getResponses().stream())
-                    .forEach(archetypeResponse -> archetypeResponse.setSchema(archetypeSchemaService.validateResponseSchema(archetypeResponse.getSchema())));
 
             // Filter only the archetypes that are not already present in DB
             List<ArchetypeEntity> newArchetypeEntites = archetypeEntities.stream()
@@ -195,8 +189,6 @@ public class ArchetypeService {
 
             // Map entity from input model, setting id and tags and completing the entities' tree
             MockResourceEntity mockResourceEntity = ConvertMockResourceFromArchetypeToMockResource.convert(mockResourceFromArchetype, archetypeEntity, resourceUrl);
-            mockResourceEntity.setTags(mockTagService.validateResourceTags(mockResourceEntity.getTags()));
-            mockResourceEntity.getRules().forEach(rule -> rule.setTags(mockTagService.validateRuleTags(rule.getTags())));
 
             // Persisting the mock resource
             mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
@@ -212,7 +204,6 @@ public class ArchetypeService {
     private Archetype persistArchetype(Archetype archetype) {
         // Map entity from input model, setting id and tags and completing the entities' tree
         ArchetypeEntity archetypeEntity = modelMapper.map(archetype, ArchetypeEntity.class);
-        archetypeEntity.setTags(mockTagService.validateResourceTags(archetypeEntity.getTags()));
 
         // Save the converted resource
         archetypeEntity = archetypeRepository.save(archetypeEntity);

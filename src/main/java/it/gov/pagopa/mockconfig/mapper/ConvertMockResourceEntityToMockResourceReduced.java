@@ -26,7 +26,7 @@ public class ConvertMockResourceEntityToMockResourceReduced implements Converter
                 .soapAction(source.getAction())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
-                .tags(Optional.ofNullable(source.getTags()).orElse(List.of()).stream().map(ResourceTagEntity::getValue).collect(Collectors.toList()));
+                .tags(new ArrayList<>(source.getTags()));
 
         return builder.build();
     }

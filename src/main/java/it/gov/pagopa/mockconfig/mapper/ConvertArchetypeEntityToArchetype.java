@@ -24,19 +24,19 @@ public class ConvertArchetypeEntityToArchetype implements Converter<ArchetypeEnt
 
         List<ArchetypeResponse> responses = new LinkedList<>();
         for (ArchetypeResponseEntity archetypeResponseEntity : source.getResponses()) {
-            String body = archetypeResponseEntity.getSchema() != null ? archetypeResponseEntity.getSchema().getContent() : null;
+            //String body = archetypeResponseEntity.getSchema() != null ? archetypeResponseEntity.getSchema().getContent() : null;
             responses.add(ArchetypeResponse.builder()
                     .id(archetypeResponseEntity.getId())
-                    .body(body)
+                    //.body(body)
                     .status(archetypeResponseEntity.getStatus())
                     .headers(archetypeResponseEntity.getHeaders().stream()
                             .map(archetypeResponseHeaderEntity -> ArchetypeResponseHeader.builder()
-                                    .name(archetypeResponseHeaderEntity.getId().getHeader())
+                                    .name(archetypeResponseHeaderEntity.getHeader())
                                     .value(archetypeResponseHeaderEntity.getValue())
                                     .build())
                             .collect(Collectors.toList())
                     )
-                    .injectableParameters(body == null || !MockResourceValidation.checkBodyEncoding(body) ? List.of() : Utility.extractInjectableParameters(new String(Base64.getDecoder().decode(body.getBytes()))))
+                    //.injectableParameters(body == null || !MockResourceValidation.checkBodyEncoding(body) ? List.of() : Utility.extractInjectableParameters(new String(Base64.getDecoder().decode(body.getBytes()))))
                     .build()
             );
         }
@@ -47,16 +47,12 @@ public class ConvertArchetypeEntityToArchetype implements Converter<ArchetypeEnt
                 .subsystem(source.getSubsystemUrl())
                 .resourceURL(source.getResourceUrl())
                 .httpMethod(source.getHttpMethod())
-                .tags(Optional.ofNullable(source.getTags())
-                        .orElse(List.of())
-                        .stream()
-                        .map(ResourceTagEntity::getValue)
-                        .collect(Collectors.toList()))
+                .tags(source.getTags())
                 .urlParameters(Optional.ofNullable(source.getParameters())
                         .orElse(List.of())
                         .stream()
                         .filter(archetypeParameterEntity -> ArchetypeParameterType.PATH.equals(archetypeParameterEntity.getType()))
-                        .map(archetypeParameterEntity -> archetypeParameterEntity.getId().getName())
+                        .map(ArchetypeParameterEntity::getName)
                         .collect(Collectors.toList()))
                 .responses(responses)
                 .build();
