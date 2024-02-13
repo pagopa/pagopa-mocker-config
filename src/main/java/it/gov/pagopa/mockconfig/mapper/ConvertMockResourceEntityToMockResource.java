@@ -24,11 +24,11 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
 
             MockResponseEntity srcResponse = srcRule.getResponse();
             MockResponse response = MockResponse.builder()
-                    .id(srcResponse.getId())
                     .body(srcResponse.getBody())
                     .status(srcResponse.getStatus())
-                    .parameters(srcResponse.getParameters().stream().map(par -> par.getId().getParameter()).collect(Collectors.toList()))
-                    .headers(srcResponse.getHeaders().stream().map(head -> ResponseHeader.builder().name(head.getId().getHeader()).value(head.getValue()).build()).collect(Collectors.toList()))
+                    .parameters(new ArrayList<>(srcResponse.getParameters()))
+                    .headers(srcResponse.getHeaders().stream().map(header -> ResponseHeader.builder().name(header.getHeader()).value(header.getValue()).build()
+                    ).collect(Collectors.toList()))
                     .build();
 
             List<MockCondition> conditions = new ArrayList<>();
@@ -52,7 +52,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                     .name(srcRule.getName())
                     .order(srcRule.getOrder())
                     .isActive(srcRule.isActive())
-                    .tags(Optional.ofNullable(srcRule.getTags()).orElse(List.of()).stream().map(RuleTagEntity::getValue).collect(Collectors.toList()))
+                    .tags(new ArrayList<>(srcRule.getTags()))
                     .conditions(conditions)
                     .response(response)
                     .build();
@@ -68,7 +68,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                 .soapAction(source.getAction())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
-                .tags(Optional.ofNullable(source.getTags()).orElse(List.of()).stream().map(ResourceTagEntity::getValue).collect(Collectors.toList()))
+                .tags(new ArrayList<>(source.getTags()))
                 .rules(rules);
 
         return builder.build();

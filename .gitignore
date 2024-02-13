@@ -35,3 +35,4 @@ build/
 
 ### Identity ###
 .identity/.terraform/*
+infra/.terraform/*

@@ -30,7 +30,7 @@ public class ArchetypeValidation {
     public static void checkURLParameters(List<ArchetypeParameterEntity> parametersToBeSet, List<StaticParameterValue> passedParameters) {
         Set<String> filteredParametersToBeSet = parametersToBeSet.stream()
                 .filter(archetypeParameterEntity -> ArchetypeParameterType.PATH.equals(archetypeParameterEntity.getType()))
-                .map(archetypeParameterEntity -> archetypeParameterEntity.getId().getName())
+                .map(ArchetypeParameterEntity::getName)
                 .collect(Collectors.toSet());
         for (StaticParameterValue parameterInRequest : passedParameters) {
             if (!filteredParametersToBeSet.contains(parameterInRequest.getName())) {

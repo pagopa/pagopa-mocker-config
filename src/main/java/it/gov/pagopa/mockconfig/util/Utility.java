@@ -28,6 +28,10 @@ public class Utility {
         .build();
   }
 
+  public static String deNull(Object value) {
+    return Optional.ofNullable(value).orElse("").toString();
+  }
+
   public static String generateUUID() {
     return UUID.randomUUID().toString();
   }
@@ -48,7 +52,8 @@ public class Utility {
         urlBuilder.append("/");
       }
     }
-    return generateHash(urlBuilder.toString(), Optional.ofNullable(soapAction).orElse("").toLowerCase(), httpMethod.name().toLowerCase());
+    String completeUrl = urlBuilder.toString().replace("//", "/");
+    return generateHash(completeUrl, Optional.ofNullable(soapAction).orElse("").toLowerCase(), httpMethod.name().toLowerCase());
   }
 
   public static String generateHash(String... content) {

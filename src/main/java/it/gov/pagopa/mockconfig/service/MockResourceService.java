@@ -24,19 +24,17 @@ import java.util.stream.Collectors;
 @Transactional
 public class MockResourceService {
 
-    @Autowired private MockTagService mockTagService;
-
     @Autowired private MockResourceRepository mockResourceRepository;
 
     @Autowired private ModelMapper modelMapper;
 
     public MockResourceList getMockResources(Pageable pageable) {
-        List<MockResource> mockResources;
+        List<MockResourceReduced> mockResources;
         Page<MockResourceEntity> mockResourcePaginatedEntities;
         try {
             mockResourcePaginatedEntities = mockResourceRepository.findAll(pageable);
             mockResources = mockResourcePaginatedEntities.stream()
-                    .map(mockResource -> modelMapper.map(mockResource, MockResource.class))
+                    .map(mockResource -> modelMapper.map(mockResource, MockResourceReduced.class))
                     .collect(Collectors.toList());
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve a list of mock resources. ", e);
@@ -51,8 +49,7 @@ public class MockResourceService {
     public MockResource getMockResource(String id) {
         MockResourceEntity mockResourceEntity;
         try {
-            mockResourceEntity = mockResourceRepository.findById(id)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve the detail of a mock resource. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
@@ -81,6 +78,31 @@ public class MockResourceService {
         return response;
     }
 
+    public MockResource upsertMockRule(String resourceId, MockRule mockRule) {
+        MockResource response;
+        try {
+
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+
+            // Map mock rule to entity and then add to resource
+            MockRuleEntity mockRuleEntity = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockResourceEntity.getRules().add(mockRuleEntity);
+
+            // check request semantic validity
+            MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
+            RequestSemanticValidator.validate(mockResource);
+
+            // Persisting the mock resource
+            response = persistMockResource(mockResource);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to create a mock rule. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     public MockResource updateMockResource(String id, MockResource mockResource) {
         MockResource response;
         try {
@@ -96,7 +118,7 @@ public class MockResourceService {
 
             // Search if the resource exists
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
-            if (!mockResourceEntity.getResourceUrl().equals(mockResource.getResourceURL()) || !mockResourceEntity.getSubsystemUrl().equals(mockResource.getSubsystem())) {
+            if (!isResourceURLNotChanged(mockResource, mockResourceEntity)) {
                 throw new AppException(AppError.MOCK_RESOURCE_BAD_REQUEST_INVALID_RESOURCE_URL, id, mockResourceEntity.getId());
             }
 
@@ -113,10 +135,56 @@ public class MockResourceService {
         return response;
     }
 
+    public MockResource updateMockRule(String resourceId, String ruleId, MockRule mockRule) {
+        MockResource response = null;
+        try {
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
+            mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
+
+            MockRuleEntity mockRuleEntityToBeUpdated = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockResourceEntity.getRules().add(mockRuleEntityToBeUpdated);
+
+            // check request semantic validity
+            MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
+            RequestSemanticValidator.validate(mockResource);
+
+            // Persisting the mock resource
+            response = persistMockResource(mockResource);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to create a mock rule. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
+    public MockResource updateMockResourceGeneralInfo(String id, MockResourceGeneralInfo mockResourceGeneralInfo) {
+        MockResource response;
+        try {
+
+            // Search if the resource exists
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+
+            // updating resource info
+            mockResourceEntity.setName(mockResourceGeneralInfo.getName());
+            mockResourceEntity.setIsActive(mockResourceGeneralInfo.getIsActive());
+            mockResourceEntity.setTags(Set.copyOf(mockResourceGeneralInfo.getTags()));
+
+            // Save the converted resource
+            mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
+            response = modelMapper.map(mockResourceEntity, MockResource.class);
+
+        } catch (DataAccessException e) {
+            log.error("An error occurred while trying to update a mock resource. ", e);
+            throw new AppException(AppError.INTERNAL_SERVER_ERROR);
+        }
+        return response;
+    }
+
     public void deleteMockResource(String id) {
         try {
-            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id)
-                    .orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
             mockResourceRepository.delete(mockResourceEntity);
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to delete a mock resource. ", e);
@@ -127,12 +195,19 @@ public class MockResourceService {
     private MockResource persistMockResource(MockResource mockResource) {
         // Map entity from input model, setting id and tags and completing the entities' tree
         MockResourceEntity mockResourceEntity = modelMapper.map(mockResource, MockResourceEntity.class);
-        mockResourceEntity.setTags(mockTagService.validateResourceTags(mockResourceEntity.getTags()));
-        mockResourceEntity.getRules().forEach(rule -> rule.setTags(mockTagService.validateRuleTags(rule.getTags())));
+        mockResourceEntity.setTags(Set.copyOf(mockResource.getTags()));
+        mockResourceEntity.getRules().forEach(rule -> rule.setTags(Set.copyOf(rule.getTags())));
 
         // Save the converted resource
         mockResourceEntity = mockResourceRepository.save(mockResourceEntity);
         return modelMapper.map(mockResourceEntity, MockResource.class);
     }
 
+    private boolean isResourceURLNotChanged(MockResource mockResource, MockResourceEntity mockResourceEntity) {
+        String mockResourceEntityResourceUrl =  Utility.deNull(mockResourceEntity.getResourceUrl());
+        String mockResourceResourceUrl =  Utility.deNull(mockResource.getResourceURL());
+        String mockResourceEntitySubsystemUrl =  Utility.deNull(mockResourceEntity.getSubsystemUrl());
+        String mockResourceSubsystemUrl =  Utility.deNull(mockResource.getSubsystem());
+        return mockResourceEntityResourceUrl.equals(mockResourceResourceUrl) && mockResourceEntitySubsystemUrl.equals(mockResourceSubsystemUrl);
+    }
 }

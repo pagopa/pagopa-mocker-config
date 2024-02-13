@@ -1,8 +1,6 @@
 package it.gov.pagopa.mockconfig.mapper;
 
 import it.gov.pagopa.mockconfig.entity.*;
-import it.gov.pagopa.mockconfig.entity.embeddable.InjectableParameterKey;
-import it.gov.pagopa.mockconfig.entity.embeddable.ResponseHeaderKey;
 import it.gov.pagopa.mockconfig.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockResponseFromArchetype;
 import it.gov.pagopa.mockconfig.model.archetype.MockRuleFromArchetype;
@@ -30,7 +28,6 @@ public class ConvertMockResourceFromArchetypeToMockResource {
                 .isActive(mockResourceFromArchetype.isActive())
                 .rules(new LinkedList<>())
                 .archetypeId(archetypeEntity.getId())
-                .archetype(archetypeEntity)
                 .build();
 
         // iterating for each rule defined in the passed input, searching if there is a correlation to the one saved in the archetype
@@ -49,21 +46,11 @@ public class ConvertMockResourceFromArchetypeToMockResource {
             MockResponseFromArchetype mockResponseFromArchetype = mockRuleFromArchetype.getResponse();
 
             // generating the mock response related to the rule
-            String mockResponseEntityId = Utility.generateUUID();
             MockResponseEntity mockResponseEntity = MockResponseEntity.builder()
-                    .id(mockResponseEntityId)
                     .body(Base64.getEncoder().encodeToString(body.getBytes()))
                     .status(mockResponseFromArchetype.getStatus())
                     .headers(new LinkedList<>())
-                    .parameters(injectableParameters.stream()
-                            .map(parameter -> InjectableParameterEntity.builder()
-                                    .id(InjectableParameterKey.builder()
-                                            .responseId(mockResponseEntityId)
-                                            .parameter(parameter)
-                                            .build())
-                                    .build()
-                            )
-                            .collect(Collectors.toList()))
+                    .parameters(new HashSet<>(injectableParameters))
                     .build();
 
             // include the headers, either the one passed as input and the ones defined in the archetype
@@ -75,10 +62,7 @@ public class ConvertMockResourceFromArchetypeToMockResource {
                     .name(mockRuleFromArchetype.getName())
                     .order(mockRuleFromArchetype.getOrder())
                     .isActive(mockResourceFromArchetype.isActive())
-                    .resource(mockResourceEntity)
-                    .resourceId(mockResourceEntity.getId())
                     .response(mockResponseEntity)
-                    .responseId(mockResponseEntity.getId())
                     .build();
             mockRuleEntity.setConditions(extractMockConditions(mockRuleFromArchetype, mockRuleEntity));
             mockResourceEntity.getRules().add(mockRuleEntity);
@@ -106,13 +90,14 @@ public class ConvertMockResourceFromArchetypeToMockResource {
 
     private static String reformatResponseBody(ArchetypeResponseEntity archetypeResponseEntity, MockRuleFromArchetype mockRuleFromArchetype) {
         String body = null;
+        /* TODO
         ArchetypeSchemaEntity schema = archetypeResponseEntity.getSchema();
         if (schema != null) {
             body = new String(Base64.getDecoder().decode(schema.getContent().getBytes()));
             for (StaticParameterValue staticValue : mockRuleFromArchetype.getResponse().getStaticValues()) {
                 body = body.replaceAll("\\$\\{" + staticValue.getName() + "\\}", staticValue.getValue());
             }
-        }
+        }*/
         return body;
     }
 
@@ -121,11 +106,7 @@ public class ConvertMockResourceFromArchetypeToMockResource {
         mockResponseEntity.getHeaders().addAll(mockResponseFromArchetype.getHeaders()
                 .stream()
                 .map(header -> ResponseHeaderEntity.builder()
-                        .id(ResponseHeaderKey.builder()
-                                .responseId(mockResponseEntity.getId())
-                                .header(header.getName())
-                                .build()
-                        )
+                        .header(header.getName())
                         .value(header.getValue())
                         .build()
                 )
@@ -142,7 +123,7 @@ public class ConvertMockResourceFromArchetypeToMockResource {
             // not passed in input, it will be added in order to be saved as template placeholder
             while (!exist && it.hasNext()) {
                 ResponseHeaderEntity headerAlreadySetFromRequest = it.next();
-                exist = headerAlreadySetFromRequest.getId().getHeader().equals(headerTemplateSetInArchetype.getId().getHeader());
+                exist = true; /* TODO headerAlreadySetFromRequest.getHeader().equals(headerTemplateSetInArchetype.getHeader());*/
             }
             if (!exist) {
                 headersSetInArchetypeToBeAdded.add(headerTemplateSetInArchetype);
@@ -150,18 +131,15 @@ public class ConvertMockResourceFromArchetypeToMockResource {
         }
 
         // finally, add the header defined in the archetype not overridden in input
+        /* TODO
         mockResponseEntity.getHeaders().addAll(headersSetInArchetypeToBeAdded.stream()
                 .map(header -> ResponseHeaderEntity.builder()
-                        .id(ResponseHeaderKey.builder()
-                                .responseId(mockResponseEntity.getId())
-                                .header(header.getId().getHeader())
-                                .build()
-                        )
+                        .header(header.getId().getHeader())
                         .value(header.getValue())
                         .build()
                 )
                 .collect(Collectors.toList())
-        );
+        );*/
     }
 
     private static List<MockConditionEntity> extractMockConditions(MockRuleFromArchetype mockRuleFromArchetype, MockRuleEntity mockRuleEntity) {
@@ -177,8 +155,6 @@ public class ConvertMockResourceFromArchetypeToMockResource {
                             .fieldName(mockCondition.getFieldName())
                             .conditionType(mockCondition.getConditionType())
                             .conditionValue(mockCondition.getConditionValue())
-                            .ruleId(mockRuleEntity.getId())
-                            .rule(mockRuleEntity)
                             .build()
             );
         }

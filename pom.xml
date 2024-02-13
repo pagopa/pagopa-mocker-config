@@ -12,12 +12,12 @@
     <groupId>it.gov.pagopa</groupId>
     <artifactId>mockconfig</artifactId>
     <version>1.1.4</version>
-    <name>pagopa-mock-config-be</name>
+    <name>pagoPA Mock Configurator</name>
     <description>A service that permits to configure the mocked responses used by Mocker service</description>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <java.version>11</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <modelmapper.version>3.1.1</modelmapper.version>
         <springdoc.version>1.6.15</springdoc.version>
@@ -38,6 +38,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- MongoDB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -64,6 +70,7 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -120,5 +127,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
     </build>
 </project>

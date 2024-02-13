@@ -2,56 +2,43 @@ package it.gov.pagopa.mockconfig.entity;
 
 import it.gov.pagopa.mockconfig.model.enumeration.HttpMethod;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
-
+import java.util.Objects;
+import java.util.Set;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
-@Entity
-@Table(name = "mock_resource")
+@EqualsAndHashCode(of = "id")
+@Document("mock_resources")
+@ToString
 public class MockResourceEntity implements Serializable {
 
     @Id
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "subsystem_url")
     private String subsystemUrl;
 
-    @Column(name = "resource_url")
     private String resourceUrl;
 
-    @Column(name = "action")
     private String action;
 
-    @Column(name = "http_method")
-    @Enumerated(EnumType.STRING)
     private HttpMethod httpMethod;
 
-    @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "archetype_id", insertable = false, updatable = false)
     private String archetypeId;
 
-    @OneToMany(targetEntity = MockRuleEntity.class, fetch = FetchType.EAGER, mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<String> tags;
+
     private List<MockRuleEntity> rules;
-
-    @ManyToMany(targetEntity = ResourceTagEntity.class)
-    @JoinTable(name = "mock_resource_tag",
-            joinColumns = {@JoinColumn(name = "mock_resource_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
-    private List<ResourceTagEntity> tags;
-
-    @OneToOne(targetEntity = ArchetypeEntity.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "archetype_id")
-    private ArchetypeEntity archetype;
 }

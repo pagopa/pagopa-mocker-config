@@ -10,14 +10,14 @@ microservice-chart:
     httpGet:
       path: /info
       port: 8080
-    initialDelaySeconds: 180
+    initialDelaySeconds: 90
     failureThreshold: 6
     periodSeconds: 10
   readinessProbe:
     httpGet:
       path: /info
       port: 8080
-    initialDelaySeconds: 180
+    initialDelaySeconds: 90
     failureThreshold: 6
     periodSeconds: 10
   deployment:
@@ -30,6 +30,7 @@ microservice-chart:
     create: true
     host: "weudev.mock.internal.dev.platform.pagopa.it"
     path: /pagopa-mock-config-be/(.*)
+    servicePort: 8080
   serviceAccount:
     create: false
     annotations: {}

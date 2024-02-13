@@ -1,17 +1,12 @@
 package it.gov.pagopa.mockconfig.mapper;
 
 import it.gov.pagopa.mockconfig.entity.*;
-import it.gov.pagopa.mockconfig.entity.embeddable.InjectableParameterKey;
-import it.gov.pagopa.mockconfig.entity.embeddable.ResponseHeaderKey;
 import it.gov.pagopa.mockconfig.model.mockresource.*;
 import it.gov.pagopa.mockconfig.util.Utility;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConvertMockResourceToMockResourceEntity implements Converter<MockResource, MockResourceEntity> {
@@ -28,7 +23,7 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                 .action(mockResource.getSoapAction())
                 .httpMethod(mockResource.getHttpMethod())
                 .isActive(mockResource.getIsActive())
-                .tags(buildResourceTagEntities(mockResource.getTags()))
+                .tags(new HashSet<>(mockResource.getTags()))
                 .build();
 
         List<MockRuleEntity> ruleEntities = new LinkedList<>();
@@ -36,7 +31,6 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
             MockResponseEntity mockResponseEntity = buildMockResponse(ruleSource.getResponse());
             MockRuleEntity mockRuleEntity = buildMockRule(ruleSource, mockResponseEntity, mockResourceEntity);
             mockRuleEntity.setConditions(buildMockConditions(ruleSource, mockRuleEntity));
-            mockResponseEntity.setRule(mockRuleEntity);
             ruleEntities.add(mockRuleEntity);
         }
         ruleEntities.sort(Comparator.comparingInt(MockRuleEntity::getOrder));
@@ -46,32 +40,6 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
         return mockResourceEntity;
     }
 
-    private List<ResourceTagEntity> buildResourceTagEntities(List<String> tags) {
-        List<ResourceTagEntity> tagEntities = new ArrayList<>();
-        for (String tag : tags) {
-            tagEntities.add(
-                    ResourceTagEntity.builder()
-                            .id(Utility.generateUUID())
-                            .value(tag)
-                            .build()
-            );
-        }
-        return tagEntities;
-    }
-
-    private List<RuleTagEntity> buildRuleTagEntities(List<String> tags) {
-        List<RuleTagEntity> tagEntities = new ArrayList<>();
-        for (String tag : tags) {
-            tagEntities.add(
-                    RuleTagEntity.builder()
-                            .id(Utility.generateUUID())
-                            .value(tag)
-                            .build()
-            );
-        }
-        return tagEntities;
-    }
-
     private MockRuleEntity buildMockRule(MockRule mockRule, MockResponseEntity mockResponseEntity, MockResourceEntity mockResourceEntity) {
         mockRule.setIdIfNull(Utility.generateUUID());
         return MockRuleEntity.builder()
@@ -79,11 +47,8 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                 .name(mockRule.getName())
                 .order(mockRule.getOrder())
                 .isActive(mockRule.getIsActive())
-                .responseId(mockResponseEntity.getId())
                 .response(mockResponseEntity)
-                .resourceId(mockResourceEntity.getId())
-                .resource(mockResourceEntity)
-                .tags(buildRuleTagEntities(mockRule.getTags()))
+                .tags(new HashSet<>(mockRule.getTags()))
                 .build();
     }
 
@@ -100,8 +65,6 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                             .fieldName(mockCondition.getFieldName())
                             .conditionType(mockCondition.getConditionType())
                             .conditionValue(mockCondition.getConditionValue())
-                            .ruleId(mockRule.getId())
-                            .rule(mockRuleEntity)
                             .build()
             );
         }
@@ -112,33 +75,18 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
     private MockResponseEntity buildMockResponse(MockResponse mockResponse) {
         mockResponse.setIdIfNull(Utility.generateUUID());
         return MockResponseEntity.builder()
-                .id(mockResponse.getId())
                 .body(mockResponse.getBody())
                 .status(mockResponse.getStatus())
                 .headers(mockResponse.getHeaders()
                         .stream()
                         .map(header -> ResponseHeaderEntity.builder()
-                                .id(ResponseHeaderKey.builder()
-                                        .responseId(mockResponse.getId())
-                                        .header(header.getName())
-                                        .build()
-                                )
+                                .header(header.getName())
                                 .value(header.getValue())
                                 .build()
                         )
                         .collect(Collectors.toList())
                 )
-                .parameters(mockResponse.getParameters()
-                        .stream()
-                        .map(parameter -> InjectableParameterEntity.builder()
-                                .id(InjectableParameterKey.builder()
-                                        .responseId(mockResponse.getId())
-                                        .parameter(parameter)
-                                        .build())
-                                .build()
-                        )
-                        .collect(Collectors.toList())
-                )
+                .parameters(new HashSet<>(mockResponse.getParameters()))
                 .build();
     }
 }

@@ -1,36 +1,29 @@
 package it.gov.pagopa.mockconfig.entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
-@Entity
-@Table(name = "archetype_schema")
+@EqualsAndHashCode(of = "id")
+@Document("archetype_schema")
+@ToString
 public class ArchetypeSchemaEntity implements Serializable {
 
     @Id
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "subsystem")
     private String subsystem;
 
-    @Column(name = "content")
     private String content;
-
-    @OneToMany(targetEntity = ArchetypeResponseEntity.class, fetch = FetchType.LAZY, mappedBy = "schema", cascade = CascadeType.ALL)
-    private List<ArchetypeResponseEntity> responses;
 }
