@@ -11,8 +11,10 @@ import it.gov.pagopa.mocker.config.util.Utility;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, MockRuleEntity> {
 
@@ -35,7 +37,7 @@ public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, Mock
                 .order(mockRule.getOrder())
                 .isActive(mockRule.getIsActive())
                 .response(mockResponseEntity)
-                .tags(new HashSet<>(mockRule.getTags()))
+                .tags(new HashSet<>(mockRule.getTags().stream().map(String::trim).filter(value -> !value.isBlank()).toList()))
                 .build();
     }
 
@@ -49,7 +51,7 @@ public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, Mock
                             .order(mockCondition.getOrder())
                             .fieldPosition(mockCondition.getFieldPosition())
                             .analyzedContentType(mockCondition.getAnalyzedContentType())
-                            .fieldName(mockCondition.getFieldName())
+                            .fieldName(mockCondition.getFieldName().trim())
                             .conditionType(mockCondition.getConditionType())
                             .conditionValue(mockCondition.getConditionValue())
                             .build()
@@ -67,13 +69,13 @@ public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, Mock
                 .headers(mockResponse.getHeaders()
                         .stream()
                         .map(header -> ResponseHeaderEntity.builder()
-                                .header(header.getName())
+                                .header(header.getName().trim())
                                 .value(header.getValue())
                                 .build()
                         )
-                        .collect(Collectors.toList())
+                        .toList()
                 )
-                .parameters(new HashSet<>(mockResponse.getParameters()))
+                .parameters(new HashSet<>(mockResponse.getParameters().stream().map(String::trim).filter(value -> !value.isBlank()).toList()))
                 .build();
     }
 }
