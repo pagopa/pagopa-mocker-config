@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mocker-config
-    tag: "1.1.5-2-fix-helm"
+    tag: "1.1.5-3-fix-helm"
     pullPolicy: Always
   livenessProbe:
     httpGet:
