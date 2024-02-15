@@ -79,7 +79,7 @@ jobs:
           pat_token: ${{ secrets.BOT_TOKEN_GITHUB }}
 
   update_openapi:
-    needs: [ deploy ]
+    # needs: [ deploy ] # TODO currently removed because a bug in deploy to AKS cluster causes a failure on whole pipeline
     runs-on: ubuntu-latest
     name: Update OpenAPI
     environment: ${{ inputs.environment }}
