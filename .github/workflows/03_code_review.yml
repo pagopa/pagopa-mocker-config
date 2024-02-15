@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_KEY: pagopa_pagopa-mock-config
+  PROJECT_KEY: pagopa_pagopa-mocker-config
 
 
 permissions:

@@ -3,7 +3,7 @@ microservice-chart:
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/pagopa-mock-config-be
+    repository: ghcr.io/pagopa/pagopa-mocker-config-be
     tag: "1.1.5"
     pullPolicy: Always
   livenessProbe:
@@ -29,7 +29,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weudev.mock.internal.uat.platform.pagopa.it"
-    path: /pagopa-mock-config-be/(.*)
+    path: /pagopa-mocker-config-be/(.*)
   serviceAccount:
     create: false
     annotations: {}
@@ -60,9 +60,9 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig:
-    WEBSITE_SITE_NAME: 'pagopamockconfig' # required to show cloud role name in application insights
+    WEBSITE_SITE_NAME: 'pagopamockerconfig' # required to show cloud role name in application insights
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-connection-string'
-    APPLICATIONINSIGHTS_ROLE_NAME: "pagopa-mock-config"
+    APPLICATIONINSIGHTS_ROLE_NAME: "pagopa-mocker-config"
     ENV: 'aks-uat'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'

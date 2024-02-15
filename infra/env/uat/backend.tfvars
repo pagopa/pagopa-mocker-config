@@ -1,4 +1,4 @@
 resource_group_name  = "io-infra-rg"
 storage_account_name = "pagopainfraterraformuat"
 container_name       = "azurermstate"
-key                  = "pagopa-mock-config-be.infra.tfstate"
+key                  = "pagopa-mocker-config-be.infra.tfstate"

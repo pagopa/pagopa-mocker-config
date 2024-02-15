@@ -10,7 +10,7 @@ on:
 
 env:
   NAMESPACE: mock
-  APP_NAME: pagopamockconfig
+  APP_NAME: pagopamockerconfig
 
 
 permissions:

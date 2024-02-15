@@ -17,7 +17,7 @@
       </allowed-headers>
     </cors>
     <base/>
-    <set-backend-service base-url="https://${hostname}/pagopa-mock-config-be" />
+    <set-backend-service base-url="https://${hostname}/pagopa-mocker-config-be" />
 
     <!-- TODO currently, this policy check only if JWT exists, it does not check permissions by user -->
     <set-variable name="aud" value="@{

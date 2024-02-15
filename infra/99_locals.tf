@@ -4,7 +4,7 @@ locals {
   apim = {
     name       = "${local.product}-apim"
     rg         = "${local.product}-api-rg"
-    product_id = "mock-config"
+    product_id = "mocker-config"
   }
 }
 

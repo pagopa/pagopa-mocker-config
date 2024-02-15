@@ -1,7 +1,7 @@
 locals {
   github = {
     org        = "pagopa"
-    repository = "pagopa-mock-config-be"
+    repository = "pagopa-mocker-config-be"
   }
 
   prefix         = "pagopa"
