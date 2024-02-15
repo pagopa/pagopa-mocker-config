@@ -3,8 +3,8 @@ microservice-chart:
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/pagopa-mock-config-be
-    tag: "1.1.5"
+    repository: ghcr.io/pagopa/pagopa-mocker-config
+    tag: "1.1.5-3-fix-helm"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -29,7 +29,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weudev.mock.internal.uat.platform.pagopa.it"
-    path: /pagopa-mock-config-be/(.*)
+    path: /pagopa-mocker-config/(.*)
   serviceAccount:
     create: false
     annotations: {}
@@ -60,22 +60,17 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig:
-    WEBSITE_SITE_NAME: 'pagopamockconfig' # required to show cloud role name in application insights
+    WEBSITE_SITE_NAME: 'pagopamockerconfig' # required to show cloud role name in application insights
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-connection-string'
-    APPLICATIONINSIGHTS_ROLE_NAME: "pagopa-mock-config"
+    APPLICATIONINSIGHTS_ROLE_NAME: "pagopa-mocker-config"
     ENV: 'aks-uat'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
-    SPRING_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.PostgreSQLDialect'
-    DATABASE_SCHEMA: 'mocker'
     REDIS_HOST: "pagopa-u-redis.redis.cache.windows.net"
     REDIS_PORT: "6380"
   envSecret:
-    SPRING_DATASOURCE_URL: 'db-mocker-url'
-    SPRING_DATASOURCE_USERNAME: 'db-mocker-user-name'
-    SPRING_DATASOURCE_PASSWORD: 'db-mocker-user-pwd'
+    MONGODB_CONNECTION_URI: 'db-mocker-uri'
     REDIS_PASSWORD: 'redis-password'
     OTEL_AUTH_BEARER: "otel-auth-bearer"
   keyvault:

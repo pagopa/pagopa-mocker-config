@@ -1,7 +1,7 @@
 locals {
   github = {
     org        = "pagopa"
-    repository = "pagopa-mock-config-be"
+    repository = "pagopa-mocker-config"
   }
 
   prefix         = "pagopa"
@@ -35,7 +35,7 @@ variable "prefix" {
   default = "pagopa"
   validation {
     condition = (
-      length(var.prefix) <= 6
+    length(var.prefix) <= 6
     )
     error_message = "Max length is 6 chars."
   }
@@ -48,7 +48,7 @@ variable "github_repository_environment" {
     reviewers_teams        = list(string)
   })
   description = "GitHub Continuous Integration roles"
-  default = {
+  default     = {
     protected_branches     = false
     custom_branch_policies = true
     reviewers_teams        = ["pagopa-team-core"]
