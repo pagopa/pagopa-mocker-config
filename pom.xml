@@ -11,7 +11,7 @@
     </parent>
     <groupId>it.gov.pagopa</groupId>
     <artifactId>mocker-config</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.5-1-fix-helm</version>
     <name>pagoPA Mocker Configurator</name>
     <description>A service that permits to configure the mocked responses used by Mocker service</description>
     <properties>
