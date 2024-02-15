@@ -11,9 +11,8 @@ locals {
 
   mockerconfig_be_client_id = data.azuread_application.mockerconfig-be.application_id
   mockerconfig_fe_client_id = data.azuread_application.mockerconfig-fe.application_id
-  pagopa_tenant_id = data.azurerm_client_config.current.tenant_id
+  pagopa_tenant_id          = data.azurerm_client_config.current.tenant_id
 }
-
 
 resource "azurerm_api_management_api_version_set" "mocker_config_api" {
 
@@ -32,7 +31,7 @@ module "apim_mocker_config_api_v1" {
   resource_group_name   = local.apim.rg
   product_ids           = [local.apim.product_id]
   subscription_required = false
-  oauth2_authorization = {
+  oauth2_authorization  = {
     # authorization_server_name = "mocker-oauth2" todo to be set when Mocker OAuth2 will be integrated
     authorization_server_name = "apiconfig-oauth2"
   }
@@ -49,18 +48,18 @@ module "apim_mocker_config_api_v1" {
 
   content_format = "openapi"
   content_value  = templatefile("../openapi/openapi.json", {
-    host = local.host
+    host     = local.host
     basePath = format("%s/v1", local.path)
   })
 
   # todo to be changed with a policy containing JWT check
-  xml_content = templatefile("./policy/_base_policy.xml", {
-    hostname               = var.hostname
-    origin                 = format("%s.%s.%s", var.cname_record_name, var.apim_dns_zone_prefix, var.external_domain)
-    local_origin           = var.env_short == "d" ? "<origin>http://localhost:3000</origin>" : ""
-    pagopa_tenant_id       = local.pagopa_tenant_id
-    be_client_id           = local.mockerconfig_be_client_id
-    fe_client_id           = local.mockerconfig_fe_client_id
+  xml_content = templatefile("./policy/jwt/_base_policy.xml", {
+    hostname         = var.hostname
+    origin           = format("shared.%s.%s", var.apim_dns_zone_prefix, var.external_domain)
+    local_origin     = var.env_short == "d" ? "<origin>http://localhost:3000</origin>" : ""
+    pagopa_tenant_id = local.pagopa_tenant_id
+    be_client_id     = local.mockerconfig_be_client_id
+    fe_client_id     = local.mockerconfig_fe_client_id
   })
 }
 
