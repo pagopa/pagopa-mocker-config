@@ -6,6 +6,6 @@ tags = {
   CreatedBy   = "Terraform"
   Environment = "Dev"
   Owner       = "pagoPA"
-  Source      = "https://github.com/pagopa/pagopa-mocker-config-be"
+  Source      = "https://github.com/pagopa/pagopa-mocker-config"
   CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
 }

@@ -6,11 +6,11 @@ tags = {
   CreatedBy   = "Terraform"
   Environment = "Uat"
   Owner       = "pagoPA"
-  Source      = "https://github.com/pagopa/pagopa-mocker-config-be"
+  Source      = "https://github.com/pagopa/pagopa-mocker-config"
   CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
 }
 
 
-apim_dns_zone_prefix               = "dev.platform"
-external_domain                    = "pagopa.it"
-hostname                           = "weudev.mock.internal.dev.platform.pagopa.it"
+apim_dns_zone_prefix = "dev.platform"
+external_domain      = "pagopa.it"
+hostname             = "weudev.mock.internal.dev.platform.pagopa.it"
