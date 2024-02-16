@@ -30,13 +30,13 @@ microservice-chart:
   ingress:
     create: true
     host: "weudev.mock.internal.uat.platform.pagopa.it"
-    path: /pagopa-mocker-config/(.*)
+    path: /pagopa-mocker-config(/|$)(.*)
     servicePort: 8080
   serviceAccount:
     create: false
-    annotations: {}
+    annotations: { }
     name: ""
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -82,8 +82,8 @@ microservice-chart:
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   tmpVolumeMount:
     create: true
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
