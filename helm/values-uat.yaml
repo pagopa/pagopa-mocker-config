@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mocker-config
-    tag: "1.2.2"
+    tag: "1.2.2-3-chart-migration-to-v3"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -17,7 +17,7 @@ microservice-chart:
     httpGet:
       path: /info
       port: 8080
-    initialDelaySeconds: 180
+    initialDelaySeconds: 90
     failureThreshold: 6
     periodSeconds: 10
   deployment:
@@ -25,11 +25,13 @@ microservice-chart:
   service:
     create: true
     type: ClusterIP
-    port: 8080
+    ports:
+      - 8080
   ingress:
     create: true
     host: "weudev.mock.internal.uat.platform.pagopa.it"
-    path: /pagopa-mocker-config/(.*)
+    path: /pagopa-mocker-config(/|$)(.*)
+    servicePort: 8080
   serviceAccount:
     create: false
     annotations: {}
@@ -45,12 +47,12 @@ microservice-chart:
       memory: "512Mi"
       cpu: "0.25"
     limits:
-      memory: "512Mi"
-      cpu: "0.25"
+      memory: "768Mi"
+      cpu: "0.5"
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 10
+    maxReplica: 2
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -69,13 +71,17 @@ microservice-chart:
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
     REDIS_HOST: "pagopa-u-redis.redis.cache.windows.net"
     REDIS_PORT: "6380"
-  envSecret:
-    MONGODB_CONNECTION_URI: 'db-mocker-uri'
-    REDIS_PASSWORD: 'redis-password'
-    OTEL_AUTH_BEARER: "otel-auth-bearer"
-  keyvault:
-    name: "pagopa-u-mock-kv"
-    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  secretProvider:
+    create: true
+    envSecrets:
+      MONGODB_CONNECTION_URI: 'db-mocker-uri'
+      REDIS_PASSWORD: 'redis-password'
+      OTEL_AUTH_BEARER: "otel-auth-bearer"
+    keyvault:
+      name: "pagopa-u-mock-kv"
+      tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  tmpVolumeMount:
+    create: true
   nodeSelector: {}
   tolerations: []
   affinity:
@@ -90,5 +96,5 @@ microservice-chart:
   canaryDelivery:
     deployment:
       image:
-        tag: 1.0.1-6-enhancements
+        tag: "0.0.0"
     create: false
