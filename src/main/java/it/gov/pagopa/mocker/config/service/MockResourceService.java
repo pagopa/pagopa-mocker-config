@@ -1,13 +1,13 @@
 package it.gov.pagopa.mocker.config.service;
 
 import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
+import it.gov.pagopa.mocker.config.entity.MockRuleEntity;
 import it.gov.pagopa.mocker.config.exception.AppError;
 import it.gov.pagopa.mocker.config.exception.AppException;
 import it.gov.pagopa.mocker.config.model.mockresource.*;
 import it.gov.pagopa.mocker.config.repository.MockResourceRepository;
-import it.gov.pagopa.mocker.config.util.validation.RequestSemanticValidator;
 import it.gov.pagopa.mocker.config.util.Utility;
-import it.gov.pagopa.mocker.config.entity.MockRuleEntity;
+import it.gov.pagopa.mocker.config.util.validation.RequestSemanticValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,9 +27,11 @@ import java.util.stream.Collectors;
 @Transactional
 public class MockResourceService {
 
-    @Autowired private MockResourceRepository mockResourceRepository;
+    @Autowired
+    private MockResourceRepository mockResourceRepository;
 
-    @Autowired private ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public MockResourceList getMockResources(Pageable pageable) {
         List<MockResourceReduced> mockResources;
@@ -67,7 +71,9 @@ public class MockResourceService {
 
             // Search if the resource already exists
             String id = Utility.generateResourceId(mockResource);
-            mockResourceRepository.findById(id).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id); });
+            mockResourceRepository.findById(id).ifPresent(res -> {
+                throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id);
+            });
 
             // Persisting the mock resource
             response = persistMockResource(mockResource);
@@ -141,10 +147,13 @@ public class MockResourceService {
         try {
             // Search if the resource exists
             MockResourceEntity mockResourceEntity = mockResourceRepository.findById(resourceId).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, resourceId));
-            mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
+            MockRuleEntity mockRuleEntityToBeRemoved = mockResourceEntity.getRules().stream().filter(mockRuleEntity -> mockRuleEntity.getId().equals(ruleId)).findFirst().orElseThrow(() -> new AppException(AppError.MOCK_RULE_NOT_FOUND, ruleId, resourceId));
 
+            // replace the old rule with the new one and then order
             MockRuleEntity mockRuleEntityToBeUpdated = modelMapper.map(mockRule, MockRuleEntity.class);
+            mockResourceEntity.getRules().remove(mockRuleEntityToBeRemoved);
             mockResourceEntity.getRules().add(mockRuleEntityToBeUpdated);
+            mockResourceEntity.getRules().sort(Comparator.comparingInt(MockRuleEntity::getOrder));
 
             // check request semantic validity
             MockResource mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
@@ -205,10 +214,10 @@ public class MockResourceService {
     }
 
     private boolean isResourceURLNotChanged(MockResource mockResource, MockResourceEntity mockResourceEntity) {
-        String mockResourceEntityResourceUrl =  Utility.deNull(mockResourceEntity.getResourceUrl());
-        String mockResourceResourceUrl =  Utility.deNull(mockResource.getResourceURL());
-        String mockResourceEntitySubsystemUrl =  Utility.deNull(mockResourceEntity.getSubsystemUrl());
-        String mockResourceSubsystemUrl =  Utility.deNull(mockResource.getSubsystem());
+        String mockResourceEntityResourceUrl = Utility.deNull(mockResourceEntity.getResourceUrl());
+        String mockResourceResourceUrl = Utility.deNull(mockResource.getResourceURL());
+        String mockResourceEntitySubsystemUrl = Utility.deNull(mockResourceEntity.getSubsystemUrl());
+        String mockResourceSubsystemUrl = Utility.deNull(mockResource.getSubsystem());
         return mockResourceEntityResourceUrl.equals(mockResourceResourceUrl) && mockResourceEntitySubsystemUrl.equals(mockResourceSubsystemUrl);
     }
 }

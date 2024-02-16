@@ -10,7 +10,7 @@ locals {
   service_url = null
 
   mockerconfig_be_client_id = data.azuread_application.mockerconfig-be.application_id
-  mockerconfig_fe_client_id = data.azuread_application.mockerconfig-fe.application_id
+  portal_fe_client_id       = data.azuread_application.portal-fe.application_id
   pagopa_tenant_id          = data.azurerm_client_config.current.tenant_id
 }
 
@@ -59,7 +59,7 @@ module "apim_mocker_config_api_v1" {
     local_origin     = var.env_short == "d" ? "<origin>http://localhost:3000</origin>" : ""
     pagopa_tenant_id = local.pagopa_tenant_id
     be_client_id     = local.mockerconfig_be_client_id
-    fe_client_id     = local.mockerconfig_fe_client_id
+    fe_client_id     = local.portal_fe_client_id
   })
 }
 
