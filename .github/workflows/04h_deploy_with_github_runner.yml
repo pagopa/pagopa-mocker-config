@@ -79,7 +79,7 @@ jobs:
           pat_token: ${{ secrets.BOT_TOKEN_GITHUB }}
 
   update_openapi:
-    # needs: [ deploy ] # TODO currently removed because a bug in deploy to AKS cluster causes a failure on whole pipeline
+    needs: [ deploy ]
     runs-on: ubuntu-latest
     name: Update OpenAPI
     environment: ${{ inputs.environment }}
@@ -102,7 +102,7 @@ jobs:
         # from https://github.com/Azure/login/commits/master
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.CLIENT_ID }}
+          client-id: ${{ secrets.CD_CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
@@ -111,7 +111,7 @@ jobs:
         shell: bash
         run: |
           cd ./infra
-          export ARM_CLIENT_ID="${{ secrets.CLIENT_ID }}"
+          export ARM_CLIENT_ID="${{ secrets.CD_CLIENT_ID }}"
           export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
           export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
           export ARM_USE_OIDC=true
