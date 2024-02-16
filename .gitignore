@@ -33,6 +33,8 @@ build/
 ### VS Code ###
 .vscode/
 
+# Helm
+/helm/charts/*
+
 ### Identity ###
-.identity/.terraform/*
-infra/.terraform/*
+**/.terraform/
