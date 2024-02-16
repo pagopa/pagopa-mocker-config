@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mocker-config
-    tag: "1.2.2-1-chart-migration-to-v3"
+    tag: "1.2.2-2-chart-migration-to-v3"
     pullPolicy: Always
   livenessProbe:
     httpGet:
