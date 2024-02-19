@@ -4,7 +4,7 @@ import it.gov.pagopa.mocker.config.model.enumeration.HttpMethod;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -25,9 +25,9 @@ public class MockResourceEntity implements Serializable {
 
     private String resourceUrl;
 
-    private String action;
-
     private HttpMethod httpMethod;
+
+    private List<SpecialRequestHeaderEntity> specialHeaders;
 
     private Boolean isActive;
 

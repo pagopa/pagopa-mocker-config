@@ -22,13 +22,20 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
 
         String subsystem = mockResource.getSubsystem().trim();
         String resourceUrl = mockResource.getResourceURL().trim();
-        String soapAction = mockResource.getSoapAction().trim();
+        List<SpecialRequestHeaderEntity> specialHeaders = mockResource.getSpecialHeaders().stream()
+                .map(header -> SpecialRequestHeaderEntity.builder()
+                        .name(header.getName().trim())
+                        .value(header.getValue())
+                        .build()
+                )
+                .toList();
+
         MockResourceEntity mockResourceEntity = MockResourceEntity.builder()
-                .id(Utility.generateResourceId(mockResource.getHttpMethod(), subsystem, resourceUrl, soapAction))
+                .id(Utility.generateResourceId(mockResource.getHttpMethod(), subsystem, resourceUrl, mockResource.getSpecialHeaders()))
                 .name(mockResource.getName())
                 .subsystemUrl(subsystem)
                 .resourceUrl(resourceUrl)
-                .action(soapAction)
+                .specialHeaders(specialHeaders)
                 .httpMethod(mockResource.getHttpMethod())
                 .isActive(mockResource.getIsActive())
                 .tags(new HashSet<>(mockResource.getTags().stream().map(String::trim).filter(value -> !value.isBlank()).toList()))
@@ -37,8 +44,8 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
         List<MockRuleEntity> ruleEntities = new LinkedList<>();
         for (MockRule ruleSource : mockResource.getRules()) {
             MockResponseEntity mockResponseEntity = buildMockResponse(ruleSource.getResponse());
-            MockRuleEntity mockRuleEntity = buildMockRule(ruleSource, mockResponseEntity, mockResourceEntity);
-            mockRuleEntity.setConditions(buildMockConditions(ruleSource, mockRuleEntity));
+            MockRuleEntity mockRuleEntity = buildMockRule(ruleSource, mockResponseEntity);
+            mockRuleEntity.setConditions(buildMockConditions(ruleSource));
             ruleEntities.add(mockRuleEntity);
         }
         ruleEntities.sort(Comparator.comparingInt(MockRuleEntity::getOrder));
@@ -48,7 +55,7 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
         return mockResourceEntity;
     }
 
-    private MockRuleEntity buildMockRule(MockRule mockRule, MockResponseEntity mockResponseEntity, MockResourceEntity mockResourceEntity) {
+    private MockRuleEntity buildMockRule(MockRule mockRule, MockResponseEntity mockResponseEntity) {
         mockRule.setIdIfNull(Utility.generateUUID());
         return MockRuleEntity.builder()
                 .id(mockRule.getId())
@@ -60,7 +67,7 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                 .build();
     }
 
-    private List<MockConditionEntity> buildMockConditions(MockRule mockRule, MockRuleEntity mockRuleEntity) {
+    private List<MockConditionEntity> buildMockConditions(MockRule mockRule) {
         List<MockConditionEntity> conditionEntities = new LinkedList<>();
         for (MockCondition mockCondition : mockRule.getConditions()) {
             mockCondition.setIdIfNull(Utility.generateUUID());

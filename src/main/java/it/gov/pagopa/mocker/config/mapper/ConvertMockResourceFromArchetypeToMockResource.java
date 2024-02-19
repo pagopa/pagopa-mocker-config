@@ -1,28 +1,29 @@
 package it.gov.pagopa.mocker.config.mapper;
 
+import it.gov.pagopa.mocker.config.entity.*;
 import it.gov.pagopa.mocker.config.model.archetype.MockResourceFromArchetype;
 import it.gov.pagopa.mocker.config.model.archetype.MockResponseFromArchetype;
 import it.gov.pagopa.mocker.config.model.archetype.MockRuleFromArchetype;
 import it.gov.pagopa.mocker.config.model.mockresource.MockCondition;
 import it.gov.pagopa.mocker.config.util.Utility;
-import it.gov.pagopa.mocker.config.entity.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConvertMockResourceFromArchetypeToMockResource {
 
-    private ConvertMockResourceFromArchetypeToMockResource() {}
+    private ConvertMockResourceFromArchetypeToMockResource() {
+    }
 
     public static MockResourceEntity convert(MockResourceFromArchetype mockResourceFromArchetype, ArchetypeEntity archetypeEntity, String resourceUrl) {
 
         // generating the mock resource
         MockResourceEntity mockResourceEntity = MockResourceEntity.builder()
-                .id(Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, archetypeEntity.getAction()))
+                .id(Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, List.of()))
                 .name(archetypeEntity.getName())
                 .subsystemUrl(archetypeEntity.getSubsystemUrl())
                 .resourceUrl(resourceUrl)
-                .action(archetypeEntity.getAction())
+                .specialHeaders(List.of())
                 .httpMethod(archetypeEntity.getHttpMethod())
                 .isActive(mockResourceFromArchetype.isActive())
                 .rules(new LinkedList<>())
