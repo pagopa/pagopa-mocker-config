@@ -2,6 +2,7 @@ package it.gov.pagopa.mocker.config.mapper;
 
 import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
 import it.gov.pagopa.mocker.config.model.mockresource.MockResourceReduced;
+import it.gov.pagopa.mocker.config.model.mockresource.SpecialRequestHeader;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 
@@ -19,7 +20,12 @@ public class ConvertMockResourceEntityToMockResourceReduced implements Converter
                 .name(source.getName())
                 .subsystem(source.getSubsystemUrl())
                 .resourceURL(source.getResourceUrl())
-                .soapAction(source.getAction())
+                .specialHeaders(source.getSpecialHeaders().stream()
+                        .map(header -> SpecialRequestHeader.builder()
+                                .name(header.getName())
+                                .value(header.getValue())
+                                .build())
+                        .toList())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
                 .tags(new ArrayList<>(source.getTags()));

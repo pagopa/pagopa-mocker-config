@@ -46,14 +46,15 @@ public class MockResource implements Serializable {
     @Schema(description = "The specific URL on which the mock resource will be defined for the subsystem. If no specific URL is needed, use blank string.", example = "organizations/77777777777")
     private String resourceURL;
 
-    @JsonProperty("soap_action")
-    @Schema(description = "The SOAP action related to the mock resource.", example = "paVerifyPaymentNotice")
-    private String soapAction;
-
     @JsonProperty("http_method")
     @Schema(description = "The HTTP method related to the mock resource.", example = "GET")
     @NotNull(message = "The HTTP method related to the mock resource cannot be null.")
     private HttpMethod httpMethod;
+
+    @JsonProperty("special_headers")
+    @Schema(description = "The special headers that can be added to a request in order to better reference a mock resource.")
+    @NotNull(message = "The list of special headers to be assigned to the mock resource cannot be null.")
+    private List<SpecialRequestHeader> specialHeaders;
 
     @JsonProperty("is_active")
     @Schema(description = "The status flag that permits to activate or not the mock resource for Mocker evaluation.", example = "true")
@@ -62,7 +63,7 @@ public class MockResource implements Serializable {
 
     @JsonProperty("tags")
     @Schema(description = "The set of tags on which the mock resource is related to.")
-    @NotNull(message = "The list of tags to be assigned the mock resource cannot be null.")
+    @NotNull(message = "The list of tags to be assigned to the mock resource cannot be null.")
     private List<String> tags;
 
     @JsonProperty("rules")

@@ -11,7 +11,6 @@ import org.modelmapper.spi.MappingContext;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ConvertMockResourceEntityToMockResource implements Converter<MockResourceEntity, MockResource> {
 
@@ -29,8 +28,12 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                     .body(srcResponse.getBody())
                     .status(srcResponse.getStatus())
                     .parameters(new ArrayList<>(srcResponse.getParameters()))
-                    .headers(srcResponse.getHeaders().stream().map(header -> ResponseHeader.builder().name(header.getHeader()).value(header.getValue()).build()
-                    ).collect(Collectors.toList()))
+                    .headers(srcResponse.getHeaders().stream()
+                            .map(header -> ResponseHeader.builder()
+                                    .name(header.getHeader())
+                                    .value(header.getValue())
+                                    .build())
+                            .toList())
                     .build();
 
             List<MockCondition> conditions = new ArrayList<>();
@@ -67,7 +70,12 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                 .name(source.getName())
                 .subsystem(source.getSubsystemUrl())
                 .resourceURL(source.getResourceUrl())
-                .soapAction(source.getAction())
+                .specialHeaders(source.getSpecialHeaders().stream()
+                        .map(header -> SpecialRequestHeader.builder()
+                                .name(header.getName())
+                                .value(header.getValue())
+                                .build())
+                        .toList())
                 .httpMethod(source.getHttpMethod())
                 .isActive(source.getIsActive())
                 .tags(new ArrayList<>(source.getTags()))

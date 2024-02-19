@@ -2,9 +2,12 @@ package it.gov.pagopa.mocker.config.service;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import it.gov.pagopa.mocker.config.entity.ArchetypeEntity;
+import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
 import it.gov.pagopa.mocker.config.exception.AppError;
 import it.gov.pagopa.mocker.config.exception.AppException;
 import it.gov.pagopa.mocker.config.mapper.ConvertMockResourceFromArchetypeToMockResource;
+import it.gov.pagopa.mocker.config.model.archetype.*;
 import it.gov.pagopa.mocker.config.model.enumeration.HttpMethod;
 import it.gov.pagopa.mocker.config.model.mockresource.MockResource;
 import it.gov.pagopa.mocker.config.repository.ArchetypeRepository;
@@ -12,9 +15,6 @@ import it.gov.pagopa.mocker.config.repository.MockResourceRepository;
 import it.gov.pagopa.mocker.config.util.OpenAPIExtractor;
 import it.gov.pagopa.mocker.config.util.Utility;
 import it.gov.pagopa.mocker.config.util.validation.RequestSemanticValidator;
-import it.gov.pagopa.mocker.config.entity.ArchetypeEntity;
-import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
-import it.gov.pagopa.mocker.config.model.archetype.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,13 +34,17 @@ import java.util.stream.Collectors;
 @Transactional
 public class ArchetypeService {
 
-    @Autowired private ArchetypeSchemaService archetypeSchemaService;
+    @Autowired
+    private ArchetypeSchemaService archetypeSchemaService;
 
-    @Autowired private MockResourceRepository mockResourceRepository;
+    @Autowired
+    private MockResourceRepository mockResourceRepository;
 
-    @Autowired private ArchetypeRepository archetypeRepository;
+    @Autowired
+    private ArchetypeRepository archetypeRepository;
 
-    @Autowired private ModelMapper modelMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public ArchetypeHandlingResult importArchetypesFromOpenAPI(MultipartFile file, String subsystem) {
         ArchetypeHandlingResult archetypeHandlingResult;
@@ -115,7 +119,9 @@ public class ArchetypeService {
             String resourceUrl = archetype.getResourceURL();
             HttpMethod httpMethod = archetype.getHttpMethod();
             archetypeRepository.findBySubsystemUrlAndResourceUrlAndHttpMethod(subsystem, resourceUrl, httpMethod)
-                    .ifPresent(res -> {throw new AppException(AppError.ARCHETYPE_CONFLICT, httpMethod ,subsystem + resourceUrl); });
+                    .ifPresent(res -> {
+                        throw new AppException(AppError.ARCHETYPE_CONFLICT, httpMethod, subsystem + resourceUrl);
+                    });
 
             // Persisting the archetype
             response = persistArchetype(archetype);
@@ -185,8 +191,10 @@ public class ArchetypeService {
             log.info(String.format("Generating mock resource with resource URL [%s] from archetype with id [%s]", resourceUrl, archetypeId));
 
             // Search if the resource already exists
-            String id = Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, archetypeEntity.getAction());
-            mockResourceRepository.findById(id).ifPresent(res -> {throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id); });
+            String id = Utility.generateResourceId(archetypeEntity.getHttpMethod(), archetypeEntity.getSubsystemUrl(), resourceUrl, List.of());
+            mockResourceRepository.findById(id).ifPresent(res -> {
+                throw new AppException(AppError.MOCK_RESOURCE_CONFLICT, id);
+            });
 
             // Map entity from input model, setting id and tags and completing the entities' tree
             MockResourceEntity mockResourceEntity = ConvertMockResourceFromArchetypeToMockResource.convert(mockResourceFromArchetype, archetypeEntity, resourceUrl);
