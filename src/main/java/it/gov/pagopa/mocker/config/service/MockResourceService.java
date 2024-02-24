@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,14 +32,14 @@ public class MockResourceService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public MockResourceList getMockResources(Pageable pageable) {
+    public MockResourceList getMockResources(Pageable pageable, String name, String tag) {
         List<MockResourceReduced> mockResources;
         Page<MockResourceEntity> mockResourcePaginatedEntities;
         try {
-            mockResourcePaginatedEntities = mockResourceRepository.findAll(pageable);
+            mockResourcePaginatedEntities = mockResourceRepository.findAll(pageable, name, tag);
             mockResources = mockResourcePaginatedEntities.stream()
                     .map(mockResource -> modelMapper.map(mockResource, MockResourceReduced.class))
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve a list of mock resources. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
