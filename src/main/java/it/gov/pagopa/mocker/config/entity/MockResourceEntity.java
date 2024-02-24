@@ -2,6 +2,7 @@ package it.gov.pagopa.mocker.config.entity;
 
 import it.gov.pagopa.mocker.config.model.enumeration.HttpMethod;
 import lombok.*;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
@@ -31,10 +32,12 @@ public class MockResourceEntity implements Serializable {
 
     private Boolean isActive;
 
+    @Indexed(name = "name_idx")
     private String name;
 
     private String archetypeId;
 
+    @Indexed(name = "tags_idx")
     private Set<String> tags;
 
     private List<MockRuleEntity> rules;
