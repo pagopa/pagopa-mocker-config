@@ -19,27 +19,33 @@ import javax.validation.constraints.PositiveOrZero;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PageInfo {
 
-  @JsonProperty("page")
-  @Schema(description = "Page number")
-  @PositiveOrZero
-  @NotNull
-  Integer page;
+    @JsonProperty("page")
+    @Schema(description = "Page number")
+    @PositiveOrZero
+    @NotNull
+    Integer page;
 
-  @JsonProperty("limit")
-  @Schema(description = "Required number of items per page")
-  @Positive
-  @NotNull
-  Integer limit;
+    @JsonProperty("limit")
+    @Schema(description = "Required number of items per page")
+    @Positive
+    @NotNull
+    Integer limit;
 
-  @JsonProperty("items_found")
-  @Schema(description = "Number of items found. (The last page may have fewer elements than required)")
-  @PositiveOrZero
-  @NotNull
-  Integer itemsFound;
+    @JsonProperty("items_found")
+    @Schema(description = "Number of items found. (The last page may have fewer elements than required)")
+    @PositiveOrZero
+    @NotNull
+    Integer itemsFound;
 
-  @JsonProperty("total_pages")
-  @Schema(description = "Total number of pages")
-  @PositiveOrZero
-  @NotNull
-  Integer totalPages;
+    @JsonProperty("total_pages")
+    @Schema(description = "Total number of pages")
+    @PositiveOrZero
+    @NotNull
+    Integer totalPages;
+
+    @JsonProperty("total_items")
+    @Schema(description = "Total number of items for all pages")
+    @PositiveOrZero
+    @NotNull
+    Long totalItems;
 }
