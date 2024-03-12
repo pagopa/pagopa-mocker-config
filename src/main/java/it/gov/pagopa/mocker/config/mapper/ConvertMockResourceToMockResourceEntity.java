@@ -1,10 +1,7 @@
 package it.gov.pagopa.mocker.config.mapper;
 
 import it.gov.pagopa.mocker.config.entity.*;
-import it.gov.pagopa.mocker.config.model.mockresource.MockCondition;
-import it.gov.pagopa.mocker.config.model.mockresource.MockResource;
-import it.gov.pagopa.mocker.config.model.mockresource.MockResponse;
-import it.gov.pagopa.mocker.config.model.mockresource.MockRule;
+import it.gov.pagopa.mocker.config.model.mockresource.*;
 import it.gov.pagopa.mocker.config.util.Utility;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -22,8 +19,8 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
 
         String subsystem = mockResource.getSubsystem().trim();
         String resourceUrl = mockResource.getResourceURL().trim();
-        List<SpecialRequestHeaderEntity> specialHeaders = mockResource.getSpecialHeaders().stream()
-                .map(header -> SpecialRequestHeaderEntity.builder()
+        List<NameValueEntity> specialHeaders = mockResource.getSpecialHeaders().stream()
+                .map(header -> NameValueEntity.builder()
                         .name(header.getName().trim())
                         .value(header.getValue())
                         .build()
@@ -56,6 +53,21 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
     }
 
     private MockRuleEntity buildMockRule(MockRule mockRule, MockResponseEntity mockResponseEntity) {
+        MockScripting mockScripting = mockRule.getScripting();
+        ScriptingEntity scriptingEntity = null;
+        if (mockScripting != null) {
+            scriptingEntity = ScriptingEntity.builder()
+                    .scriptName(mockScripting.getScriptName())
+                    .isActive(mockScripting.getIsActive())
+                    .parameters(mockScripting.getInputParameters().stream()
+                            .map(parameter -> NameValueEntity.builder()
+                                    .name(parameter.getName())
+                                    .value(parameter.getValue())
+                                    .build())
+                            .toList())
+                    .build();
+        }
+
         mockRule.setIdIfNull(Utility.generateUUID());
         return MockRuleEntity.builder()
                 .id(mockRule.getId())
@@ -63,6 +75,7 @@ public class ConvertMockResourceToMockResourceEntity implements Converter<MockRe
                 .order(mockRule.getOrder())
                 .isActive(mockRule.getIsActive())
                 .response(mockResponseEntity)
+                .scripting(scriptingEntity)
                 .tags(new HashSet<>(mockRule.getTags().stream().map(String::trim).filter(value -> !value.isBlank()).toList()))
                 .build();
     }

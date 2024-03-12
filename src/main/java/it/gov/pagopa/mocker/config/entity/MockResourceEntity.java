@@ -28,7 +28,7 @@ public class MockResourceEntity implements Serializable {
 
     private HttpMethod httpMethod;
 
-    private List<SpecialRequestHeaderEntity> specialHeaders;
+    private List<NameValueEntity> specialHeaders;
 
     private Boolean isActive;
 

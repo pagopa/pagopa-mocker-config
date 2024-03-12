@@ -1,6 +1,9 @@
 package it.gov.pagopa.mocker.config.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,4 +28,6 @@ public class MockRuleEntity implements Serializable {
     private List<MockConditionEntity> conditions;
 
     private MockResponseEntity response;
+
+    private ScriptingEntity scripting;
 }

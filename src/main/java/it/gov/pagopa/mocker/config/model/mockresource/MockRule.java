@@ -60,6 +60,10 @@ public class MockRule implements Serializable {
     @Valid
     private List<MockCondition> conditions;
 
+    @JsonProperty("scripting")
+    @Schema(description = "The information about the script to be executed by Mocker if all the conditions occurs.")
+    private MockScripting scripting;
+
     @JsonProperty("response")
     @Schema(description = "The mocked response that the Mocker will give as output if all the condition are verified for the mock rule.")
     @NotNull(message = "The mock response to be assigned the mock rule cannot be null.")

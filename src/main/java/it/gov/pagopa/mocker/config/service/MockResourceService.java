@@ -2,10 +2,12 @@ package it.gov.pagopa.mocker.config.service;
 
 import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
 import it.gov.pagopa.mocker.config.entity.MockRuleEntity;
+import it.gov.pagopa.mocker.config.entity.ScriptEntity;
 import it.gov.pagopa.mocker.config.exception.AppError;
 import it.gov.pagopa.mocker.config.exception.AppException;
 import it.gov.pagopa.mocker.config.model.mockresource.*;
 import it.gov.pagopa.mocker.config.repository.MockResourceRepository;
+import it.gov.pagopa.mocker.config.repository.ScriptRepository;
 import it.gov.pagopa.mocker.config.util.Utility;
 import it.gov.pagopa.mocker.config.util.validation.RequestSemanticValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,9 @@ public class MockResourceService {
     private MockResourceRepository mockResourceRepository;
 
     @Autowired
+    private ScriptRepository scriptRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public MockResourceList getMockResources(Pageable pageable, String name, String tag) {
@@ -51,14 +56,26 @@ public class MockResourceService {
     }
 
     public MockResource getMockResource(String id) {
-        MockResourceEntity mockResourceEntity;
+        MockResource mockResource;
         try {
-            mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            MockResourceEntity mockResourceEntity = mockResourceRepository.findById(id).orElseThrow(() -> new AppException(AppError.MOCK_RESOURCE_NOT_FOUND, id));
+            mockResource = modelMapper.map(mockResourceEntity, MockResource.class);
+            // setting detail about scripting info
+            List<MockRule> mockRulesWithScripting = mockResource.getRules().stream()
+                    .filter(rule -> rule.getScripting() != null)
+                    .toList();
+            for (MockRule mockRule : mockRulesWithScripting) {
+                MockScripting mockScripting = mockRule.getScripting();
+                ScriptEntity scriptEntity = scriptRepository.findByName(mockScripting.getScriptName()).orElseThrow(() -> new AppException(AppError.SCRIPT_NOT_FOUND, mockScripting.getScriptName()));
+                mockScripting.setDescription(scriptEntity.getDescription());
+                mockScripting.setOutputParameters(scriptEntity.getOutputParameters());
+            }
+
         } catch (DataAccessException e) {
             log.error("An error occurred while trying to retrieve the detail of a mock resource. ", e);
             throw new AppException(AppError.INTERNAL_SERVER_ERROR);
         }
-        return modelMapper.map(mockResourceEntity, MockResource.class);
+        return mockResource;
     }
 
     public MockResource createMockResource(MockResource mockResource) {
