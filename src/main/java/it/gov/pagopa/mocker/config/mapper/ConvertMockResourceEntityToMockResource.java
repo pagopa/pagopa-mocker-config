@@ -1,9 +1,6 @@
 package it.gov.pagopa.mocker.config.mapper;
 
-import it.gov.pagopa.mocker.config.entity.MockConditionEntity;
-import it.gov.pagopa.mocker.config.entity.MockResourceEntity;
-import it.gov.pagopa.mocker.config.entity.MockResponseEntity;
-import it.gov.pagopa.mocker.config.entity.MockRuleEntity;
+import it.gov.pagopa.mocker.config.entity.*;
 import it.gov.pagopa.mocker.config.model.mockresource.*;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -52,6 +49,21 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
             }
             conditions.sort(Comparator.comparingInt(MockCondition::getOrder));
 
+            ScriptingEntity scriptingEntity = srcRule.getScripting();
+            MockScripting mockScripting = null;
+            if (scriptingEntity != null) {
+                mockScripting = MockScripting.builder()
+                        .scriptName(scriptingEntity.getScriptName())
+                        .isActive(scriptingEntity.getIsActive())
+                        .inputParameters(scriptingEntity.getParameters().stream()
+                                .map(parameter -> ScriptParameter.builder()
+                                        .name(parameter.getName())
+                                        .value(parameter.getValue())
+                                        .build())
+                                .toList())
+                        .build();
+            }
+
             MockRule rule = MockRule.builder()
                     .id(srcRule.getId())
                     .name(srcRule.getName())
@@ -59,6 +71,7 @@ public class ConvertMockResourceEntityToMockResource implements Converter<MockRe
                     .isActive(srcRule.isActive())
                     .tags(new ArrayList<>(srcRule.getTags()))
                     .conditions(conditions)
+                    .scripting(mockScripting)
                     .response(response)
                     .build();
             rules.add(rule);

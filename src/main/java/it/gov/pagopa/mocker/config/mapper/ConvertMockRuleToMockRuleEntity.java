@@ -1,12 +1,10 @@
 package it.gov.pagopa.mocker.config.mapper;
 
-import it.gov.pagopa.mocker.config.entity.MockConditionEntity;
-import it.gov.pagopa.mocker.config.entity.MockResponseEntity;
-import it.gov.pagopa.mocker.config.entity.MockRuleEntity;
-import it.gov.pagopa.mocker.config.entity.ResponseHeaderEntity;
+import it.gov.pagopa.mocker.config.entity.*;
 import it.gov.pagopa.mocker.config.model.mockresource.MockCondition;
 import it.gov.pagopa.mocker.config.model.mockresource.MockResponse;
 import it.gov.pagopa.mocker.config.model.mockresource.MockRule;
+import it.gov.pagopa.mocker.config.model.mockresource.MockScripting;
 import it.gov.pagopa.mocker.config.util.Utility;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -30,6 +28,20 @@ public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, Mock
     }
 
     private MockRuleEntity buildMockRule(MockRule mockRule, MockResponseEntity mockResponseEntity) {
+        MockScripting mockScripting = mockRule.getScripting();
+        ScriptingEntity scriptingEntity = null;
+        if (mockScripting != null) {
+            scriptingEntity = ScriptingEntity.builder()
+                    .scriptName(mockScripting.getScriptName())
+                    .isActive(mockScripting.getIsActive())
+                    .parameters(mockScripting.getInputParameters().stream()
+                            .map(parameter -> NameValueEntity.builder()
+                                    .name(parameter.getName())
+                                    .value(parameter.getValue())
+                                    .build())
+                            .toList())
+                    .build();
+        }
         mockRule.setIdIfNull(Utility.generateUUID());
         return MockRuleEntity.builder()
                 .id(mockRule.getId())
@@ -37,6 +49,7 @@ public class ConvertMockRuleToMockRuleEntity implements Converter<MockRule, Mock
                 .order(mockRule.getOrder())
                 .isActive(mockRule.getIsActive())
                 .response(mockResponseEntity)
+                .scripting(scriptingEntity)
                 .tags(new HashSet<>(mockRule.getTags().stream().map(String::trim).filter(value -> !value.isBlank()).toList()))
                 .build();
     }

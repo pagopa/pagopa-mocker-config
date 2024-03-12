@@ -15,7 +15,6 @@ on:
         options:
           - dev
           - uat
-          - prod
       version:
         required: false
         type: choice
