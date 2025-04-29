@@ -7,10 +7,6 @@ on:
         required: true
         description: The name of the environment where to deploy
         type: string
-      branch:
-        required: false
-        default: ${{ github.ref_name }}
-        type: string
 
 env:
   NAMESPACE: mock
@@ -30,7 +26,7 @@ jobs:
       - name: Deploy
         uses: pagopa/github-actions-template/aks-deploy@main
         with:
-          branch: ${{ inputs.branch }}
+          branch: ${{ github.ref_name }}
           client_id: ${{ secrets.CD_CLIENT_ID }}
           subscription_id: ${{ secrets.SUBSCRIPTION_ID }}
           tenant_id: ${{ secrets.TENANT_ID }}
