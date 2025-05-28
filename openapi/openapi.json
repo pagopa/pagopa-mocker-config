@@ -4,7 +4,7 @@
     "title": "pagoPA Mocker Configurator",
     "description": "A service that permits to configure the mocked responses used by Mocker service",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "1.2.6"
+    "version": "1.2.6-1-PIDM-484-update-helm-chart"
   },
   "servers": [
     {
