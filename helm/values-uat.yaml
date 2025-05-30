@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mocker-config
-    tag: "1.2.7"
+    tag: "1.2.8"
     pullPolicy: Always
   livenessProbe:
     httpGet:
