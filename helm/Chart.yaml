@@ -3,7 +3,7 @@ name: pagopa-mocker-config
 description: A service that permits to configure the mocked responses used by Mocker service
 type: application
 version: 1.36.0
-appVersion: 1.2.6-1-PIDM-484-update-helm-chart
+appVersion: 1.2.7
 dependencies:
   - name: microservice-chart
     version: 7.5.0

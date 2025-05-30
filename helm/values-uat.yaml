@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-mocker-config
-    tag: "1.2.6-1-PIDM-484-update-helm-chart"
+    tag: "1.2.7"
     pullPolicy: Always
   livenessProbe:
     httpGet:
