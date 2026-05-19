@@ -23,6 +23,8 @@
 
 In pratica: tutto quello che il Mocker usa per generare le risposte mock viene **configurato attraverso questo servizio**.
 
+> 🖥️ Per la gestione tramite interfaccia web, vedere la **[Guida Operativa Mocker — Shared Toolbox](https://github.com/pagopa/pagopa-shared-toolbox/blob/docs/guida-operativa-mocker/docs/GUIDA_OPERATIVA_MOCKER.md)**.
+
 ---
 
 ## Rapporto con il Mocker
@@ -67,7 +69,9 @@ http://localhost:8080/swagger-ui.html
 
 ---
 
-## Avvio locale
+## Architettura del sistema
+
+**Controller principali:**
 
 ### Prerequisiti
 
