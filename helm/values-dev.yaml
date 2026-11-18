@@ -62,6 +62,7 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig:
+    JAVA_TOOL_OPTIONS: "-XX:-UseBASE64Intrinsics -XX:UseAVX=2"
     WEBSITE_SITE_NAME: 'pagopamockerconfig' # required to show cloud role name in application insights
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-connection-string'
     APPLICATIONINSIGHTS_ROLE_NAME: "pagopa-mocker-config"
